@@ -16,10 +16,9 @@ And activated by using this one:
 ```
 /refinery
 ```
-> [!WARNING]
-> The skill should be triggered automatically when the context is appropriate, but this rarely works.
-> Claude is too convinced that a Python script is sufficient.
-> If you know how to fix this, PRs are very welcome.
+The skill should be triggered automatically when the context is appropriate, but this rarely works.
+Claude is too convinced that a Python script is sufficient.
+If you know how to fix this, PRs are very welcome.
 
 > [!NOTE]
 > Bug reports and suggestions are welcome - open an issue or a pull request!

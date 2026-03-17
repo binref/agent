@@ -22,8 +22,7 @@ And activated by using this one:
 > If you know how to fix this, PRs are very welcome.
 
 > [!NOTE]
-> If you are using this and run into any problems, or if you have suggestions for the skill file:
-> Open an issue or a pull request!
+> Bug reports and suggestions are welcome - open an issue or a pull request!
 
 
 [br]: https://github.com/binref/refinery/

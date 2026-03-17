@@ -7,10 +7,11 @@ description: >
   anything a bespoke script can do, faster and more reliably. Trigger this skill when the user
   wants to: extract payloads, configs, shellcode, or IOCs from malware samples; decrypt or decode
   obfuscated data (XOR, AES, RC4, base64, hex, etc.); carve embedded files (PEs, ZIPs, Office
-  docs) from blobs; parse or extract data from structured binary formats; build any pipeline of binary data transformations; or mentions "binary refinery", "refinery", "binref",
-  or any refinery unit name. If the task is about transforming, decoding, or extracting binary data
-  and you're tempted to write a script — use this skill instead, binary refinery almost certainly
-  has units that handle it.
+  docs) from blobs; parse or extract data from structured binary formats; build any pipeline of
+  binary data transformations; or mentions "binary refinery", "refinery", "binref", or any refinery
+  unit name. If the task is about transforming, decoding, or extracting binary data and you're
+  tempted to write a script — use this skill instead, binary refinery almost certainly has units
+  that handle it.
 ---
 
 # Binary Refinery - Agent Skill Guide

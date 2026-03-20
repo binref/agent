@@ -434,7 +434,7 @@ Avoid nesting them; instead use one after the other at the same frame depth:
 $ emit sample [                                     \
   | push [| vsnip 0x200010:0x10 | sha256 | pop k ]  \
   | push [| vsnip 0x200020:0x10 | pop iv ]          \
-  | vsnip 0x4AAB00:0x4500 | aes --iv=v:iv v:key | dump payload.bin ]
+  | vsnip 0x4AAB00:0x4500 | aes --iv=v:iv v:k | dump payload.bin ]
 ```
 
 ### Output, Peeking, and Debugging

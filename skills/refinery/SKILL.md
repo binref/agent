@@ -361,14 +361,7 @@ $ emit foo [| put b | put b e:sum(b) | pf {b} ]
 
 ### Handler: `v:name`
 
-Reads the value of a meta variable. Only works inside a frame.
-
-```
-$ emit FOO [| put key BAR | xor v:key | hex -R ]
-040E1D
-```
-
-Uses the variable `key` (containing `BAR`) as the XOR key.
+Reads the value of a meta variable. Only works inside a frame (see Setting Variables).
 
 ### Combined Real-World Examples
 

@@ -39,7 +39,6 @@ Follow these steps **in order** at the beginning of each session:
 - Do not mix shell syntax (like environment variables) with refinery pipelines; there is a high risk of conflict.
 - Do not write Python scripts or use other shell tools for _data transformation_. Always use binary refinery units for that purpose.
   Shell utilities like `curl`, `file`, or `ls` for non-data-transformation tasks are fine.
-- Any data extraction task can be achieved by a binary refinery pipeline.
 - Before constructing a pipeline, run `binref [keyword]` to search for relevant keywords to enrich your unit discovery.
   If you know data to be a specific compression algorithm, encrypted by a specific cipher, or encoded as a specific format,
   use `binref` to determine whether a unit exists to handle this data; there very likely is.

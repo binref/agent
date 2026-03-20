@@ -418,7 +418,7 @@ Decode a `sockaddr_in` structure to human-readable `IP:Port`:
 ```
 $ emit "0x51110002 0xAFBAFA12" | pack -B4                     \
   | struct 2x{port:!H}{addr:4}{} [                            \
-  | push var:addr | pack -R [| sep . ]| pop addr              \
+  | push v:addr | pack -R [| sep . ]| pop addr              \
   | pf {addr}:{port} ]
 18.250.186.175:4433
 ```
@@ -469,7 +469,7 @@ FFOOOO,BBAARR,BBAAZZ
 Reduce a frame by successively appending chunks (reverses order):
 
 ```
-$ emit 5 4 3 2 1 0 [| reduce cca[var:t] ]
+$ emit 5 4 3 2 1 0 [| reduce cca[v:t] ]
 012345
 ```
 
@@ -496,7 +496,7 @@ OD
 Push/pop to extract a prefix and prepend it:
 
 ```
-$ emit "FOO BAR" [| push | snip :4 | pop oof | ccp var:oof ]
+$ emit "FOO BAR" [| push | snip :4 | pop oof | ccp v:oof ]
 FOO FOO BAR
 ```
 
@@ -544,7 +544,7 @@ Extract C2 URL from a macro lure document with WSH-encoded variables:
 $ emit sample.docx | xt settings.xml                          \
   | xtxml docVars/10* [| eat val ]                            \
   | hex | wshenc | carve -dn5 string [                        \
-  | dedup | pop k | swap k | hex | xor var:k ]                \
+  | dedup | pop k | swap k | hex | xor v:k ]                  \
   | xtp url
 ```
 
@@ -567,14 +567,14 @@ $ emit sample.exe [[                                          \
   | put backup [                                              \
   | rex "\x51\x68(....)\xBA(..\0\0)\xB9(....)\xE8" {1}{3}{2}  \
   | struct {ka:L}{da:L}{dl:L}                                 \
-  | put key vsnip[ka:128]:var:backup                          \
-  | emit vsnip[da:dl]:var:backup                              \
-  | xor var:key ]                                             \
+  | put key vsnip[ka:128]:v:backup                            \
+  | emit vsnip[da:dl]:v:backup                                \
+  | xor v:key ]                                               \
   | resplit h:00                                              \
   | swap key                                                  \
   | swap backup                                               \
   | perc RCDATA [| max size ]                                 \
-  | rc4 sha1:var:key                                          \
+  | rc4 sha1:v:key                                            \
   | put required x::20                                        \
   | put computed sha1:c:                                      \
   | iff required -eq computed                                 \

@@ -363,17 +363,6 @@ $ emit sample [ \
   | vsnip 0x4AAB00:0x4500 | aes --iv=v:iv v:key | dump payload.bin ]
 ```
 
-### Variable Backup
-
-In some cases, it can be useful to maintain a backup of the input data in a variable to be emitted later.
-For example, assume a ZIP file with data caves containing a payload,
-and payload extraction details in an embedded file:
-
-```
-$ emit sample.zip [ \
-  | put b | xt "*.ps1" | rex "offset=(\d+)$" {1} | emit v:b |
-```
-
 ## Examples
 
 ### Encoding, Hashing & Carving

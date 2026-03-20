@@ -504,13 +504,6 @@ Extract HTTP GET requests from a PCAP:
 $ emit capture.pcap | pcap [| rex "^GET\s[^\s]+" | sep ]
 ```
 
-Extract a JS payload from a malicious Office document:
-
-```
-$ emit sample.doc | doctxt | repl drp:c:                      \
-  | carve -s b64 | rev | b64 | rev | ppjscript
-```
-
 Extract URLs from a malicious PDF's JavaScript:
 
 ```

@@ -42,7 +42,7 @@ Follow these steps **in order** at the beginning of each session:
 - Before constructing a pipeline, run `binref [keyword]` to search for relevant keywords to enrich your unit discovery.
   If you know data to be a specific compression algorithm, encrypted by a specific cipher, or encoded as a specific format,
   use `binref` to determine whether a unit exists to handle this data; there very likely is.
-- Before using any unit, run it with `-h` to understand its full interface.
+- Before using any unit, run it with `-?` to understand its interface.
   Also do this when you intend to use the unit as a multibin handler (see below).
   If the output is truncated, re-run the command redirecting to a temporary file and read that file.
   This is **essential** — information you miss from an interface cannot later be guessed.

@@ -465,7 +465,8 @@ y=68
 
 ### Frame Manipulation
 
-Reduce a frame by successively appending chunks (reverses order):
+The `reduce` unit works similar to `functools.reduce` in Python and can collapse multiple chunks into one.
+Here is an example where a frame is reduced by successively appending the chunks in reverses order:
 
 ```
 $ emit 5 4 3 2 1 0 [| reduce cca[v:t] ]

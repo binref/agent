@@ -47,6 +47,8 @@ Follow these steps **in order** at the beginning of each session:
   If the output is truncated, re-run the command redirecting to a temporary file and read that file.
   This is **essential** — information you miss from an interface cannot later be guessed.
 - The `-R` flag can reverse a unit's operation when this is supported (e.g. `b64 -R` base64-encodes).
+- The `-T` flag silences exceptions and returns input data if no output would be produced.
+- The `-Q` flag silences exceptions and returns no output when execution fails.
 
 ## Regular Expressions
 
@@ -89,7 +91,7 @@ Another example is the following malware config extraction pipeline:
 
 ```
 $ emit malware.exe [                                                          \
-  | dnfields [| aes x::32 --iv x::16 -Q | sep ]                               \
+  | dnfields [| aes x::32 --iv x::16 -T | sep ]                               \
   | rex -M "((??email))\n(.*)\n((??host))\n:Zone" addr={1} pass={2} host={3}  \
   | sep ]
 ```

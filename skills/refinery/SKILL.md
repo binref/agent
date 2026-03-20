@@ -316,8 +316,14 @@ This will always emit the string "file.exe", even if that file exists on disk.
 
 ### Handler: `e:expression`
 
-Performs a limited evaluation of `expression`.
+Evaluates the given Python expression; this may use meta variables as variables within the expression.
 For example, if `expression` is an integer literal string, the result of this operation is the integer itself.
+For example, this computes the sum of all bytes in the input:
+
+```
+$ emit foo [| put b | put b e:sum(b) | pf {b} ]
+324
+```
 
 ### Handler: `v:name`
 

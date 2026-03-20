@@ -83,7 +83,7 @@ In the output, all dates in the input text will have been replaced by their ISO 
 Another example is the following malware config extraction pipeline:
 
 ```
-$ emit fb47a566911905d37bdb464a08ca66b9078f18f10411ce019e9d5ab747571b40 [     \
+$ emit malware.exe [                                                          \
   | dnfields [| aes x::32 --iv x::16 -Q | sep ]                               \
   | rex -M "((??email))\n(.*)\n((??host))\n:Zone" addr={1} pass={2} host={3}  \
   | sep ]
@@ -392,7 +392,7 @@ Another example was the use of the `pbkdf2` unit in the `x:` handler example abo
 Extract a RemCos C2 server:
 
 ```
-$ emit c0019718c4d4538452affb97c70d16b7af3e4816d059010c277c4e579075c944 \
+$ emit malware.exe \
   | perc SETTINGS [| put keylen x::1 | rc4 x::keylen | xtp socket ]
 ```
 
@@ -403,7 +403,7 @@ The remaining data is decrypted and socket indicators are extracted.
 Extract an AgentTesla configuration:
 
 ```
-$ emit fb47a566911905d37bdb464a08ca66b9078f18f10411ce019e9d5ab747571b40 \
+$ emit malware.exe \
   | dnfields [| aes x::32 --iv x::16 -Q | sep ] \
   | rex -M "((??email))\n(.*)\n(.*)\n:Zone" addr={1} pass={2} host={3}
 ```

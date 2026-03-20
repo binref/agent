@@ -156,30 +156,25 @@ $ emit md5[-t]:password
 The regular-expression based units `rex`, `resub`, and `resplit` support a regex extension `(??name)` that expands to a built-in pattern.
 Before writing regular expressions manually, consult the following table to see if a pattern is already available:
 
-| Pattern     | Matches                                                                            |
-| ----------- | ---------------------------------------------------------------------------------- |
-| `url`       | A URL                                                                              |
-| `ipv4`      | An IPv4 address                                                                    |
-| `socket`    | A domain name or an IPv4 address, followed by a colon and a port number            |
-| `host`      | A domain name or an IPv4 address, optionally followed by a colon and a port number |
-| `domain`    | A domain name                                                                      |
-| `email`     | An email address                                                                   |
-| `hex`       | A hexadecimal string                                                               |
-| `b64`       | A base64-encoded blob                                                              |
-| `str`       | A quoted c-string literal                                                          |
-| `ps1str`    | A quoted PowerShell string literal                                                 |
-| `vbastr`    | A quoted VisualBasic string literal                                                |
-| `int`       | A single integer (decimal)                                                         |
-| `intarray`  | A comma-separated list of integers                                                 |
-| `strarray`  | A comma-separated list of quoted strings                                           |
-| `hexarray`  | A comma-separated list of hex-encoded values                                       |
-| `ipv6`      | An IPv6 address                                                                    |
-| `guid`      | A GUID/UUID                                                                        |
-| `date`      | An expression that matches on various date formats                                 |
-| `winpath`   | A Windows path                                                                     |
-| `nixpath`   | A Unix path                                                                        |
-| `path`      | Any path                                                                           |
-| `printable` | Printable text                                                                     |
+| Pattern    | Matches                                       |
+| ---------- | --------------------------------------------- |
+| `url`      | A URL                                         |
+| `ipv4`     | IPv4 address                                  |
+| `ipv6`     | IPv6 address                                  |
+| `socket`   | domain or ip followed by colon and port       |
+| `host`     | like socket, but port suffix optional         |
+| `domain`   | domain name                                   |
+| `email`    | email address                                 |
+| `hex`      | hex string                                    |
+| `b64`      | base64-encoded data                           |
+| `str`      | quoted c-string literal                       |
+| `int`      | any integer literal                           |
+| `intarray` | comma or semicolon-separated list of integers |
+| `strarray` | list of quoted string literals                |
+| `hexarray` | list of hex-encoded values                    |
+| `date`     | matches various date formats                  |
+| `winpath`  | Windows path                                  |
+| `nixpath`  | Unix path                                     |
 
 Here is one example for the documentation of the (somewhat niche) unit `datefix`, which can be used to normalize dates:
 

@@ -266,7 +266,8 @@ $ emit FOO [| put x BAR | cca v:x | sep ]
 FOOBAR
 ```
 
-[`v:x` retrieves the meta variable's value (`BAR`); full details are in Frame-Dependent Multibin Handlers below.]
+The multibin expression `v:x` retrieves the meta variable's value (`BAR`);
+ full details are in Frame-Dependent Multibin Handlers below.
 
 ### Push and Pop
 

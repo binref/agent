@@ -210,7 +210,7 @@ FOO.FOO.
 FOO.FOO.
 ```
 
-`chop 4` produces `[OOOO,OOOO]`, then `chop 2` producues `[[OO,OO],[OO,OO]]`.
+`chop 4` produces `[OOOO,OOOO]`, then `chop 2` produces `[[OO,OO],[OO,OO]]`.
 After closing the inner frame, `sep` inserts a newline between the outer chunks.
 
 Without nesting, `chop 2` simply inserts its multiple outputs into the frame,

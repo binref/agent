@@ -111,7 +111,7 @@ $ ef "**" [| xtp -n6 ipv4 socket url email | dedup | sep ]
 XOR brute force with extraction:
 
 ```
-$ emit file.bin | rep 0x100 [| xor v:index | carve-pe -R | peek | dump {name} ]
+$ emit file.bin | rep 0x100 [| xor v:index | carve-pe -R | dump {name} ]
 ```
 
 ## Meta Variables

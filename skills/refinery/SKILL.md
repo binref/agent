@@ -538,7 +538,7 @@ $ emit 5 4 3 2 1 0 [| reduce cca[v:t] ]
 Select specific chunks by index with squeezing:
 
 ```
-$ emit range:0x30:0x3A | chop 1 [| pick 3:5 1 7: []| sep , ]
+$ emit s:0123456789 | chop 1 [| pick 3:5 1 7: []| sep , ]
 34,1,789
 ```
 

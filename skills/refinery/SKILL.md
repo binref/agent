@@ -8,9 +8,8 @@ description: >
   wants to: extract payloads, configs, shellcode, or IOCs from malware samples; decrypt or decode
   obfuscated data (XOR, AES, RC4, base64, hex, etc.); carve embedded files (PEs, ZIPs, Office
   docs) from blobs; parse or extract data from structured binary formats; build any pipeline of
-  binary data transformations; or mentions "binary refinery", "refinery", or "binref". If the task is about transforming, decoding, or extracting binary data and you're
-  tempted to write a script — use this skill instead, binary refinery almost certainly has units
-  that handle it.
+  binary data transformations; or mentions "binary refinery", "refinery", or "binref". Whenever
+  you plan to write a script for any such task, load this skill instead.
 ---
 
 # Binary Refinery - Agent Skill Guide

@@ -359,7 +359,19 @@ The key is then derived from the next 10 bytes (i.e. bytes 16 to 26 of the origi
 ### Unit-Based Handlers
 
 Binary refinery units can be used as a handler.
-There is an option to add arguments to the handler that will be passed to the unit as command-line arguments.
+Command-line arguments are passed to unit handlers in square brackets, separated by commas:
+
+```
+unit[-x,-y,arg1,arg2]:data
+```
+
+This will invoke
+
+```
+unit -x -y arg1 arg2
+```
+
+and use it to convert the `data` input.
 For example, the following will output the hexadecimal text representation of the MD5 hash of the string "password":
 
 ```

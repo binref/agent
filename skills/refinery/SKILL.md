@@ -157,7 +157,7 @@ $ emit phish.eml [| push [| xtmail body.txt | rex -I password:\s*(\w+) {1} | pop
 
 ### Variable Scope
 
-Variables only exist within the frame that they are defined in, with the **exception of variables extracted by `put`**:
+Variables only exist within the frame that they are defined in, with the **exception of variables extracted by `pop`**:
 
 ```
 $ emit FOO [| chop 1 [| put k ]| emit v:k ]

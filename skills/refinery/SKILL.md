@@ -19,9 +19,13 @@ When this skill is active, prioritize binary refinery pipelines over custom code
 Binary Refinery is a collection of command-line tools for transforming binary data.
 Each tool is called a **unit** and reads from stdin and writes to stdout.
 Units are combined into **pipelines** using the `|` pipe operator.
-Units cannot be called by passing a file name as argument; the correct pattern is `emit file.bin | unit`.
+Units cannot be called by passing a file name as argument; the correct pattern is
+
+```
+emit /full/path/to/file.bin | unit
+```
+
 All output is sent to STDOUT, debug messages and `peek` unit previews (see below) appear on STDERR.
-All Binary Refinery units exist as shell commands; use them.
 
 ## Mandatory Startup Protocol
 
@@ -32,21 +36,58 @@ Follow these steps **in order** at the beginning of each session:
    If the output is truncated, re-run the command redirecting to a temporary file and read that file.
 2. Run `binref -h` to learn the search syntax for discovering units by keyword.
 
+If these commands do not exist, install binary refinery by:
+
+1. Creating a dedicated virtual environment for this project or activating the one it uses.
+2. Run: `pip install binary-refinery`
+
+## Critical Rule
+
+**IMPORTANT.** The inclusion of **any** unit in **any** pipeline for **any** reason is **invalid**
+unless this unit is invoked with the `-?` switch earlier in the session transcript.
+If it does not appear, run it now. There are **no exceptions to this rule**.
+Check this before every unit call, every pipeline construction,
+and also do this when you intend to use the unit as a multibin handler (see below).
+
+If you find yourself copying a unit invocation from the examples section, **STOP**.
+Run the unit with `-?` first. The examples are illustrations, not templates to copy verbatim.
+
+If the `-?` output is truncated, re-run the command redirecting to a temporary file and read that file.
+This is **essential** — information you miss from an interface **cannot later be guessed**
+and your instincts about the syntax, without proper research, will be **wrong**.
+
 ## Operational Rules
 
-- Do not mix shell syntax (especially environment variables) with refinery pipelines; there is a high risk of conflict.
-- Do not write Python scripts or use other shell tools for _data transformation_. Always use binary refinery units for that purpose.
+- Do not write Python scripts or use other shell tools for data transformations.
+  Always use binary refinery units for that purpose.
   Shell utilities like `curl`, `file`, or `ls` for non-data-transformation tasks are fine.
+- Use `peek` as your universal data preview tool.
+  Run `peek -l0` instead of `file`, `peek -dd` instead of `head`, and simply `peek` instead of `xxd`.
+  Control peek length with `peek -l=<line-count>`.
+- To write data to disk, use the `dump` unit.
+- Whenever you are extracting data based on patterns, use the `carve` unit.
+- Whenever you are extracting indicators from data, use `xtp`.
 - Before constructing a pipeline, run `binref [keyword]` to search for relevant keywords to enrich your unit discovery.
   If you know data to be a specific compression algorithm, encrypted by a specific cipher, or encoded as a specific format,
   use `binref` to determine whether a unit exists to handle this data; there very likely is.
-- Before using any unit, run it with `-?` to understand its interface.
-  Also do this when you intend to use the unit as a multibin handler (see below).
-  If the output is truncated, re-run the command redirecting to a temporary file and read that file.
-  This is **essential** — information you miss from an interface cannot later be guessed.
 - The `-R` flag can reverse a unit's operation when this is supported (e.g. `b64 -R` base64-encodes).
 - The `-T` flag silences exceptions and returns input data if no output would be produced.
 - The `-Q` flag silences exceptions and returns no output when execution fails.
+- When constructing a pipeline that ingests file data, pass file paths as literal strings to `emit`.
+  Never assign paths to shell variables first; it conflicts with multibin expression parsing and produces wrong results.
+- When dealing with obfuscated or encrypted data, exhaust the discovery process (`binref [keyword]`)
+  for units that can handle it automatically before resorting to manual inspection.
+- When a unit produces errors or incomplete output, debug it.
+  Do not abandon a conceptually correct unit after a single failure.
+
+## Unit Lookup Strategy
+
+When searching for units, pursue the following iterative approach:
+
+1. Run a very broad `binref` search with a wide net of possible keywords that could occur on a matching unit.
+2. If there are no good results, run the same search, but specify `binref -a` to also search the command-line flags.
+3. As long as there are too many results, either restrict the set of keywords reduce the search radius
+   (from `-a` to no flag, or from no flag to `-b` for only brief description search).
 
 ## Multibin Expressions
 
@@ -138,8 +179,9 @@ $ emit md5[-t]:password
 
 ## Regular Expressions
 
-The regular-expression based units `rex`, `resub`, and `resplit` support a regex extension `(??name)` that expands to a built-in pattern.
-Before writing regular expressions manually, consult the following table to see if a pattern is already available:
+All regular expressions support a regex extension `(??name)` that expands to a built-in pattern.
+Before writing regular expressions manually, consult the below table and simplify your expression by using
+already existing, named patterns.
 
 | Pattern    | Matches                                       |
 | ---------- | --------------------------------------------- |
@@ -234,7 +276,6 @@ XXYY
 
 `snip` extracts two slices `0::2` and `1::2`, but they are not emitted as separate chunks, but concatenated immediately.
 
-
 ### Real-World Framing Examples
 
 List all PE file sections with their SHA-256 hash:
@@ -257,19 +298,6 @@ Extract indicators from all files recursively:
 ```
 $ ef "**" [| xtp -n6 ipv4 socket url email | dedup | sep ]
 ```
-
-Extract an AgentTesla malware config by AES-decrypting .NET fields and pulling indicators with named regex patterns:
-
-```
-$ emit malware.exe [                                                          \
-  | dnfields [| aes x::32 --iv x::16 -T | sep ]                               \
-  | rex -M "((??email))\n(.*)\n((??host))\n:Zone" addr={1} pass={2} host={3}  \
-  | sep ]
-```
-
-`dnfields` extracts all .NET fields, then each is AES-decrypted using a 32-byte prefix key and 16-byte IV;
-`-T` silences failures so only the successfully decrypted field survives.
-`rex` with named patterns for `email` and `host` pulls the indicators from the decrypted strings.
 
 ## Meta Variables
 
@@ -297,7 +325,7 @@ The original is moved out of scope (invisible), and the copy remains visible for
 Conversely, `pop varname` consumes the visible chunk(s), stores them as the variable `varname`, and restores the original:
 
 ```
-$ emit key=value | push [[| rex =(.*)$ {1} | pop v ]| repl v:v censored ]
+$ emit key=value | push [[| resplit = | pick 1 | pop v ]| repl v:v censored ]
 key=censored
 ```
 
@@ -306,13 +334,6 @@ Notably, `pop` can extract more than one chunk from the frame:
 ```
 $ emit binary refinery go [| pop b r | pf {} {b} {r} ]
 go binary refinery
-```
-
-A more complex example extracting a password from an email:
-
-```
-$ emit phish.eml [| push [| xtmail body.txt | rex -I password:\s*(\w+) {1} | pop password ] \
-  | xt *.zip | xt *.exe -p v:password | dump extracted/{path} ]
 ```
 
 ### Variable Scope
@@ -435,15 +456,6 @@ $ emit sample [                                     \
   | vsnip 0x4AAB00:0x4500 | aes --iv=v:iv v:k | dump payload.bin ]
 ```
 
-### Output, Peeking, and Debugging
-
-- Prioritize `peek` over `xxd` or `head` for inspecting output. It produces a short hex dump and metadata preview.
-- When `peek` is **not** the last unit in the pipeline, it forwards all input data, making it a useful debugging tool.
-  Use it inside a frame to inspect each chunk individually.
-- `peek -dd` for plaintext, `peek -b` for a one-line hex preview.
-- Control peek length with `peek -l=<line-count>`.
-- To write data to disk, use the `dump` unit.
-
 ### Incremental Pipeline Construction
 
 For pipelines with more than 3 stages, build incrementally:
@@ -459,96 +471,9 @@ catching errors early and making debugging straightforward.
 
 ### Debugging Failing Pipelines
 
+- When `peek` is **not** the last unit in the pipeline, it forwards all input data, making it a useful debugging tool.
+  Use it inside a frame to inspect each chunk individually.
 - If a pipeline produces no output or wrong output, bisect it by inserting `peek` statements.
   Move `peek` left or right to find where extraction produces unexpected results.
 - If you used `-T` or `-Q` and the output looks wrong, remove these flags and re-run to see the actual error messages.
 - Use the `-v` flag on individual units to increase their output verbosity to identify root causes.
-
-## Examples
-
-The following examples demonstrate complex multi-concept pipelines.
-
-### Data Parsing & Formatting
-
-Decode a `sockaddr_in` structure to human-readable `IP:Port`:
-
-```
-$ emit "0x51110002 0xAFBAFA12" | pack -B4       \
-  | struct 2x{port:!H}{addr:4}{} [              \
-  | push v:addr | pack -R [| sep . ]| pop addr  \
-  | pf {addr}:{port} ]
-18.250.186.175:4433
-```
-
-Parse repeating 3-byte structs and format with extracted variables:
-
-```
-$  emit Ax!Dy! | struct -m {k:B}{:1}{:1} {2} {3} [| group 2 [| pop a | pf {a}={k} ]| sep ]
-x=65
-y=68
-```
-
-### Frame Manipulation
-
-Select specific chunks by index with squeezing:
-
-```
-$ emit s:0123456789 | chop 1 [| pick 3:5 1 7: []| sep , ]
-34,1,789
-```
-
-Transpose columnar data across chunks:
-
-```
-$ emit HELLO WORLD [| transpose | sep ]
-HW
-EO
-LR
-LL
-OD
-```
-
-### Malware Analysis
-
-Extract HTTP GET requests from a PCAP:
-
-```
-$ emit capture.pcap | pcap [| rex "^GET\s[^\s]+" | sep ]
-```
-
-Extract URLs from a malicious PDF's JavaScript:
-
-```
-$ emit sample.pdf                               \
-  | xt JS | carve -sd string | carve -sd string \
-  | url | xtp url [| urlfix | sep ]
-```
-
-Recursively peel nested HTML + JS + base64 layers to extract a URL:
-
-```
-$ emit sample.hta                               \
-  | loop 8 xthtml[script]:csd[string]:url       \
-  | csd string | b64 | xtp url
-```
-
-Extract C2 URL from a macro lure document with WSH-encoded variables:
-
-```
-$ emit sample.docx | xt settings.xml            \
-  | xtxml docVars/10* [| eat val ]              \
-  | hex | wshenc | carve -dn5 string [          \
-  | dedup | pop k | swap k | hex | xor v:k ]    \
-  | xtp url
-```
-
-### Virtual Stack Emulation
-
-Solve a FlareOn ASCII-art challenge by stripping the art, decoding, and emulating x64 shellcode:
-
-```
-$ emit challenge.bin                            \
-  | resub | trim -ui flareon | b64 | zl         \
-  | vstack -w10 -p9: -ax64 [                    \
-  | sorted -a size | trim h:00 | pop key | xor v:key ]
-```

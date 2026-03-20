@@ -16,32 +16,37 @@ description: >
 
 # Binary Refinery - Agent Skill Guide
 
-You are a malware analyst and expert user of Binary Refinery.
+When this skill is active, prioritize binary refinery pipelines over custom code for all data transformation tasks.
 
 Binary Refinery is a collection of command-line tools for transforming binary data.
 Each tool is called a **unit** and reads from stdin and writes to stdout.
 Units are combined into **pipelines** using the `|` pipe operator.
 A unit always accepts its input via STDIN and sends its output to STDOUT; they cannot be called by passing a file name as argument.
+The correct pattern is: `emit file.bin | unit`
 All Binary Refinery units exist as shell commands; use them.
 
-## Rules of Engagement
+## Mandatory Startup Protocol
 
-- Do not write Python scripts or use other shell tools. Always use binary refinery units.
+Follow these steps **in order** at the beginning of each session:
+
+1. Run `binref -g` to get a complete overview of all available units.
+   This is **essential** — units you don't know about cannot be discovered later by guessing.
+   If the output is truncated, re-run the command redirecting to a temporary file and read that file.
+2. Run `binref -h` to understand how to use the search tool.
+
+## Operational Rules
+
+- Do not write Python scripts or use other shell tools for *data transformation*. Always use binary refinery units for that purpose.
+  Shell utilities like `curl`, `file`, or `ls` for non-data-transformation tasks are fine.
 - Any data extraction task can be achieved by a binary refinery pipeline.
-- **IMPORTANT.** At the beginning of each session, run `binref -g` to get a complete overview of all available units,
-  **If the output is truncated, read the full output file before proceeding!**
-  This is an **essential** step — units you don't know about cannot be discovered later by guessing.
-- At the beginning of each session, run `binref -h` to understand how to use the search tool.
-- **IMPORTANT.** Before building a pipeline, run each unit you consider using with `-h` to understand its full interface;
-  having the full picture is important to making a decision about how and when to use it.
-  Also do this when you intend to use the unit as a multibin handler (see below).
-  **If the output is truncated, read the full output file before proceeding!**
-  This is an **essential** step — information you miss from an interface cannot later be guessed.
-- Before constructing a pipeline, use `binref` to search for relevant keywords to enrich your unit discovery.
-- If you know data to be a specific compression algorithm, encrypted by a specific cipher, or encoded as a specific format,
+- Before constructing a pipeline, run `binref [keyword]` to search for relevant keywords to enrich your unit discovery.
+  If you know data to be a specific compression algorithm, encrypted by a specific cipher, or encoded as a specific format,
   use `binref` to determine whether a unit exists to handle this data; there very likely is.
+- Before using any unit, run it with `-h` to understand its full interface.
+  Also do this when you intend to use the unit as a multibin handler (see below).
+  If the output is truncated, re-run the command redirecting to a temporary file and read that file.
+  This is **essential** — information you miss from an interface cannot later be guessed.
 - The `-R` flag can reverse a unit's operation when this is supported (e.g. `b64 -R` base64-encodes).
-- The `-Q` flag suppresses errors and silently drops chunks that fail.
 
 ## Regular Expressions
 

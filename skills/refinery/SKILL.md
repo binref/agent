@@ -190,7 +190,7 @@ $ emit OOOOOOOO | chop 2 [| ccp F | cca . ]
 FOO.FOO.FOO.FOO.
 ```
 
-Explanation: `chop 2` splits `OOOOOOOO` into the frame `[OO, OO, OO, OO]`.
+`chop 2` splits `OOOOOOOO` into the frame `[OO, OO, OO, OO]`.
 Inside the frame, `ccp F` prepends `F` to each chunk and `cca .` appends a period.
 The closing `]` on `cca` concatenates all chunks back together.
 
@@ -205,13 +205,37 @@ Without an outer frame, meta variables do not function and units like `put`, `po
 Frames can nest to arbitrary depth. Each `[` opens a new layer, each `]` closes one:
 
 ```
-$ emit OOOOOOOO | chop 4 [| chop 2 [| ccp F | cca . ]| sep ]
+$ emit OOOOOOOO | chop 4 [| chop 2 [| pf F{}. ]| sep ]
 FOO.FOO.
 FOO.FOO.
 ```
 
-Here, `chop 4` produces `[OOOO, OOOO]`, then `chop 2` inside a nested frame further splits each into `[OO, OO]`.
-After processing and closing the inner frame, `sep` inserts a newline between the outer chunks.
+`chop 4` produces `[OOOO,OOOO]`, then `chop 2` producues `[[OO,OO],[OO,OO]]`.
+After closing the inner frame, `sep` inserts a newline between the outer chunks.
+
+Without nesting, `chop 2` simply inserts its multiple outputs into the frame,
+producing `[OO,OO,OO,OO]`:
+
+```
+$ emit OOOOOOOO | chop 4 [| chop 2 | pf F{}. | sep ]
+FOO.
+FOO.
+FOO.
+FOO.
+```
+
+### Squeezing
+
+Specify `[]` as the nesting instruction to fuse all output chunks into one by concatenating them:
+
+```
+$ emit XYXYXYXY | chop 4 [| snip 0::2 1::2 []| sep ]
+XXYY
+XXYY
+```
+
+`snip` extracts two slices `0::2` and `1::2`, but they are not emitted as separate chunks, but concatenated immediately.
+
 
 ### Real-World Framing Examples
 

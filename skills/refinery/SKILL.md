@@ -205,6 +205,13 @@ These can be used in format strings with `{name}` syntax and in multibin express
 - **`iffs needle`**: Keep chunks containing the binary substring `needle`. Use `-i` for case-insensitive.
 - **`iffc bounds`**: Keep chunks whose size falls within the given bounds (e.g. `iffc 100:500`).
 
+### Peeking
+
+- The unit `peek` produces a short (10 to 12 line) hex dump and metadata preview of the output.
+- Prioritize using `peek` over `xxd` or `head` for getting an output preview.
+- Use `peek -dd` if you expect plaintext data.
+- Use `peek -b` inside a frame with many chunks to get a one-line hex preview of every chunk.
+
 ### Picking
 
 The unit `pick` selects chunks by index from a frame.

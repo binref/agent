@@ -480,7 +480,7 @@ $ emit range:0x30:0x3A | chop 1 [| pick 3:5 1 7: []| sep , ]
 34,1,789
 ```
 
-Transpose columnar data across chunks
+Transpose columnar data across chunks:
 
 ```
 $ emit HELLO WORLD [| transpose | sep ]

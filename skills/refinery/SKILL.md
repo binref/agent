@@ -435,6 +435,7 @@ $ emit sample [ \
 ### Peeking and Debugging
 
 - The unit `peek` produces a short (10 to 12 line) hex dump and metadata preview of the output.
+- When `peek` is **not** the last unit in the pipeline, it forwards all input data, making it a useful debugging tool.
 - Prioritize using `peek` over `xxd` or `head` for getting an output preview.
 - Precisely control the length of the peek output by specifying `peek -l=<line-count>`
 - Use `peek -dd` if you expect plaintext data, or `peek -d` if decoded text lines should be truncated rather than wrapped.

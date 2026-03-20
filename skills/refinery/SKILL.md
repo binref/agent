@@ -184,6 +184,7 @@ rather than having them concatenated with line breaks.
   It must always be the very last argument.
 - Append `]` as the **last argument** to a unit to **close one frame layer**.
   The chunks in that frame are concatenated back together.
+- The `sep` unit inserts a separator (default: newline) between chunks before they are joined.
 
 ```
 $ emit OOOOOOOO | chop 2 [| ccp F | cca . ]
@@ -211,7 +212,6 @@ FOO.FOO.
 ```
 
 `chop 4` produces `[OOOO,OOOO]`, then `chop 2` produces `[[OO,OO],[OO,OO]]`.
-After closing the inner frame, `sep` inserts a newline between the outer chunks.
 
 Without nesting, `chop 2` simply inserts its multiple outputs into the frame,
 producing `[OO,OO,OO,OO]`:

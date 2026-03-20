@@ -56,18 +56,14 @@ Follow these steps **in order** at the beginning of each session:
 Many unit arguments accept **multibin expressions**: a special syntax that preprocesses data through a chain of handlers before passing it to the unit.
 Without a handler prefix, if the string matches a file path on disk, the file's contents are used.
 Otherwise, the string is treated as its UTF-8 encoding.
-Handlers are evaluated right-to left, similar to function evaluation:
+Handlers are evaluated right to left:
 
 ```
 handler4:handler3:handler2:handler1:input
 ```
 
-This takes the input string, evaluates it using the default handler, then successively applies handlers 1 through 4 to it.
-The result after applying handler 4 is what is passed to the unit.
-
-**WARNING.** In some units, **multibin suffixes** are used.
-This will be mentioned explicitly in the unit's help output when queried.
-If a unit notes that data is processed with a multibin suffix, it means that handlers are applied left to right rather than right to left.
+**WARNING.** Some units use **multibin suffixes** (noted in their help output),
+where handlers are applied left to right instead.
 For example, in a format string `{field:hex:b64}`, the value of `field` is first processed by `hex`, then by `b64`.
 
 ### Handler: `h:hexstring`
@@ -81,29 +77,16 @@ HELLO
 
 ### Handler: `s:string`
 
-Forces UTF-8 string interpretation. The string is never looked up as a file path or otherwise interpreted:
+Forces UTF-8 string interpretation — the string is never treated as a handler prefix or looked up as a file path:
 
 ```
 $ emit s:h:hello
 h:hello
-```
-
-This always produces the 7 bytes for "h:hello", and there is no other way to emit this string:
-
-```
-$ emit h:hello
-usage: emit [-h] [-L] [-Q] [-v] [-T] [data ...]
-emit: error: argument data: invalid multibin value: 'h:hello'
-```
-
-Furthermore,
-
-```
 $ emit s:file.exe
 file.exe
 ```
 
-This will always emit the string "file.exe", even if that file exists on disk.
+Without `s:`, `h:hello` would be parsed as hex-decode and `file.exe` would read the file from disk if it exists.
 
 ### Handler: `c:start:length[:stride]`
 
@@ -116,14 +99,14 @@ $ emit FOO-BAR | xor c::3 | esc -R
 \x00\x00\x00k\r\x0e\x14
 ```
 
-Here, `c::3` copies the first 3 bytes (`FOO`) without removing them, so `xor` uses `FOO` as key against the full 7-byte input.
+`c::3` copies the first 3 bytes (`FOO`) as the XOR key without removing them from the input.
 
 ```
 $ emit #H#E#L#L#O | emit c:1::2
 HELLO
 ```
 
-Here, `c:1::2` copies every other byte starting at offset 1, extracting only the letters.
+`c:1::2` copies every other byte starting at offset 1.
 
 ### Handler: `x:start:length[:stride]`
 
@@ -135,7 +118,7 @@ $ emit FOO-BAR | xor x::3 | esc -R
 k\r\x0e\x14
 ```
 
-Here, `x::3` extracts and removes the first 3 bytes (`FOO`), so `xor` uses `FOO` as key against only the remaining 4 bytes (`-BAR`).
+`x::3` extracts and removes the first 3 bytes (`FOO`), so `xor` uses `FOO` as key against only the remaining `-BAR`.
 
 ```
 $ emit #H#E#L#L#O######## | emit x:1:10:2 x::5
@@ -143,8 +126,7 @@ HELLO
 #####
 ```
 
-The first extraction `x:1:10:2` pulls every other byte starting at offset 1 within a span of 10 (the letters).
-The second `x::5` then takes the first 5 bytes of what remains.
+`x:1:10:2` pulls every other byte in a span of 10; `x::5` then takes the first 5 of what remains.
 
 ### Unit-Based Handlers
 
@@ -206,19 +188,6 @@ $ emit text.md | resub ((??date)) {1:datefix}
 ```
 
 In the output, all dates in the input text will have been replaced by their ISO representation.
-Another example is the following malware config extraction pipeline:
-
-```
-$ emit malware.exe [                                                          \
-  | dnfields [| aes x::32 --iv x::16 -T | sep ]                               \
-  | rex -M "((??email))\n(.*)\n((??host))\n:Zone" addr={1} pass={2} host={3}  \
-  | sep ]
-```
-
-This pipeline first extracts all .NET fields, then attempts to AES-decrypt all of them using a prefix key and IV,
-discarding any failures quietly.
-The only successfully decrypted field contains the encrypted strings,
-from which the relevant indicators are extracted using `rex` with named patterns for `email` and `host`.
 
 ## Framing Syntax
 
@@ -285,6 +254,15 @@ Extract indicators from all files recursively:
 $ ef "**" [| xtp -n6 ipv4 socket url email | dedup | sep ]
 ```
 
+Extract an AgentTesla malware config by AES-decrypting .NET fields and pulling indicators with named regex patterns:
+
+```
+$ emit malware.exe [                                                          \
+  | dnfields [| aes x::32 --iv x::16 -T | sep ]                               \
+  | rex -M "((??email))\n(.*)\n((??host))\n:Zone" addr={1} pass={2} host={3}  \
+  | sep ]
+```
+
 ## Meta Variables
 
 Meta variables are key-value pairs attached to each chunk inside a frame.
@@ -300,6 +278,9 @@ They are **only available inside frames**; this is why the outer frame rule abov
 $ emit FOO [| put x BAR | cca v:x | sep ]
 FOOBAR
 ```
+
+Here, we use the multibin handler `v:` which retrieves the value of a meta variable.
+The value of the multibin expression `v:x` is therefore `BAR`, the value we stored in `x` using `put`.
 
 ### Push and Pop
 

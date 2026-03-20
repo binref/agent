@@ -51,6 +51,124 @@ Follow these steps **in order** at the beginning of each session:
 - The `-T` flag silences exceptions and returns input data if no output would be produced.
 - The `-Q` flag silences exceptions and returns no output when execution fails.
 
+## Multibin Expressions
+
+Many unit arguments accept **multibin expressions**: a special syntax that preprocesses data through a chain of handlers before passing it to the unit.
+Without a handler prefix, if the string matches a file path on disk, the file's contents are used.
+Otherwise, the string is treated as its UTF-8 encoding.
+Handlers are evaluated right-to left, similar to function evaluation:
+
+```
+handler4:handler3:handler2:handler1:input
+```
+
+This takes the input string, evaluates it using the default handler, then successively applies handlers 1 through 4 to it.
+The result after applying handler 4 is what is passed to the unit.
+
+**WARNING.** In some units, **multibin suffixes** are used.
+This will be mentioned explicitly in the unit's help output when queried.
+If a unit notes that data is processed with a multibin suffix, it means that handlers are applied left to right rather than right to left.
+For example, in a format string `{field:hex:b64}`, the value of `field` is first processed by `hex`, then by `b64`.
+
+### Handler: `h:hexstring`
+
+Hex-decodes a literal hexadecimal string.
+
+```
+$ emit h:48454C4C4F
+HELLO
+```
+
+### Handler: `s:string`
+
+Forces UTF-8 string interpretation. The string is never looked up as a file path or otherwise interpreted:
+
+```
+$ emit s:h:hello
+h:hello
+```
+
+This always produces the 7 bytes for "h:hello", and there is no other way to emit this string:
+
+```
+$ emit h:hello
+usage: emit [-h] [-L] [-Q] [-v] [-T] [data ...]
+emit: error: argument data: invalid multibin value: 'h:hello'
+```
+
+Furthermore,
+
+```
+$ emit s:file.exe
+file.exe
+```
+
+This will always emit the string "file.exe", even if that file exists on disk.
+
+### Handler: `c:start:length[:stride]`
+
+Copies bytes from the input at offset `start` with the given `length`, optionally with the given `stride`.
+This is **non-destructive**: the input data is not modified.
+If `length` is omitted, copies to the end. If `start` is omitted, it defaults to 0; it behaves like a Python slice.
+
+```
+$ emit FOO-BAR | xor c::3 | esc -R
+\x00\x00\x00k\r\x0e\x14
+```
+
+Here, `c::3` copies the first 3 bytes (`FOO`) without removing them, so `xor` uses `FOO` as key against the full 7-byte input.
+
+```
+$ emit #H#E#L#L#O | emit c:1::2
+HELLO
+```
+
+Here, `c:1::2` copies every other byte starting at offset 1, extracting only the letters.
+
+### Handler: `x:start:length[:stride]`
+
+Same as `c:`, but **removes** the extracted bytes from the input data.
+All `x:` operations are performed in the order arguments appear on the command line.
+
+```
+$ emit FOO-BAR | xor x::3 | esc -R
+k\r\x0e\x14
+```
+
+Here, `x::3` extracts and removes the first 3 bytes (`FOO`), so `xor` uses `FOO` as key against only the remaining 4 bytes (`-BAR`).
+
+```
+$ emit #H#E#L#L#O######## | emit x:1:10:2 x::5
+HELLO
+#####
+```
+
+The first extraction `x:1:10:2` pulls every other byte starting at offset 1 within a span of 10 (the letters).
+The second `x::5` then takes the first 5 bytes of what remains.
+
+### Unit-Based Handlers
+
+Binary refinery units can be used as a handler.
+Command-line arguments are passed to unit handlers in square brackets, separated by commas:
+
+```
+unit[-x,-y,arg1,arg2]:data
+```
+
+This will invoke
+
+```
+unit -x -y arg1 arg2
+```
+
+and use it to convert the `data` input.
+For example, the following will output the hexadecimal text representation of the MD5 hash of the string "password":
+
+```
+$ emit md5[-t]:password
+5f4dcc3b5aa765d61d8327deb882cf99
+```
+
 ## Regular Expressions
 
 The regular-expression based units `rex`, `resub`, and `resplit` support a regex extension `(??name)` that expands to a built-in pattern.
@@ -167,12 +285,6 @@ Extract indicators from all files recursively:
 $ ef "**" [| xtp -n6 ipv4 socket url email | dedup | sep ]
 ```
 
-XOR brute force with extraction:
-
-```
-$ emit file.bin | rep 0x100 [| xor v:index | carve-pe -R | dump {name} ]
-```
-
 ## Meta Variables
 
 Meta variables are key-value pairs attached to each chunk inside a frame.
@@ -270,59 +382,9 @@ The unit `pick` selects chunks by index from a frame.
 For example, `pick 0 2:` returns all chunks except the one at index 1.
 `pick 0` returns only the first chunk. `pick ::-1` reverses the order of chunks.
 
-## Multibin Expressions
+## Frame-Dependent Multibin Handlers
 
-Many unit arguments accept **multibin expressions**: a special syntax that preprocesses data through a chain of handlers before passing it to the unit.
-Without a handler prefix, if the string matches a file path on disk, the file's contents are used.
-Otherwise, the string is treated as its UTF-8 encoding.
-Handlers are evaluated right-to left, similar to function evaluation:
-
-```
-handler4:handler3:handler2:handler1:input
-```
-
-This takes the input string, evaluates it using the default handler, then successively applies handlers 1 through 4 to it.
-The result after applying handler 4 is what is passed to the unit.
-
-**WARNING.** In some units, **multibin suffixes** are used.
-This will be mentioned explicitly in the unit's help output when queried.
-If a unit notes that data is processed with a multibin suffix, it means that handlers are applied left to right rather than right to left.
-For example, in a format string `{field:hex:b64}`, the value of `field` is first processed by `hex`, then by `b64`.
-
-### Handler: `h:hexstring`
-
-Hex-decodes a literal hexadecimal string.
-
-```
-$ emit h:48454C4C4F
-HELLO
-```
-
-### Handler: `s:string`
-
-Forces UTF-8 string interpretation. The string is never looked up as a file path or otherwise interpreted:
-
-```
-$ emit s:h:hello
-h:hello
-```
-
-This always produces the 7 bytes for "h:hello", and there is no other way to emit this string:
-
-```
-$ emit h:hello
-usage: emit [-h] [-L] [-Q] [-v] [-T] [data ...]
-emit: error: argument data: invalid multibin value: 'h:hello'
-```
-
-Furthermore,
-
-```
-$ emit s:file.exe
-file.exe
-```
-
-This will always emit the string "file.exe", even if that file exists on disk.
+The following multibin handlers interact with frame data and meta variables.
 
 ### Handler: `e:expression`
 
@@ -346,67 +408,6 @@ $ emit FOO [| put key BAR | xor v:key | hex -R ]
 
 Uses the variable `key` (containing `BAR`) as the XOR key.
 
-### Handler: `c:start:length[:stride]`
-
-Copies bytes from the input at offset `start` with the given `length`, optionally with the given `stride`.
-This is **non-destructive**: the input data is not modified.
-If `length` is omitted, copies to the end. If `start` is omitted, it defaults to 0; it behaves like a Python slice.
-
-```
-$ emit ABCDEFGH [| put k c:2:3 | pf {k}{} ]
-CDEABCDEFGH
-```
-
-Copies 3 bytes starting at offset 2 (i.e. `CDE`).
-
-### Handler: `x:start:length[:stride]`
-
-Same as `c:`, but **removes** the extracted bytes from the input data.
-All `x:` operations are performed in the order arguments appear on the command line.
-
-Simple example — extract a 4-byte header and store it, then process the remaining data:
-
-```
-$ emit HDRPAYLOADDATA [| put header x::3 | pf {header}:{} ]
-HDR:PAYLOADDATA
-```
-
-Here, `x::3` extracts the first 3 bytes into `header` and removes them; the chunk becomes `PAYLOADDATA`.
-
-This is also useful for protocols where keys or IVs are prepended to ciphertext:
-
-```
-$ emit data | aes --mode cbc --iv=x::16 pbkdf2[32,salted]:x::10
-```
-
-Here, `x::16` extracts the first 16 bytes as the IV and removes them from the data before decryption.
-The key is then derived from the next 10 bytes (i.e. bytes 16 to 26 of the original input) as password using PBKDF2.
-
-### Unit-Based Handlers
-
-Binary refinery units can be used as a handler.
-Command-line arguments are passed to unit handlers in square brackets, separated by commas:
-
-```
-unit[-x,-y,arg1,arg2]:data
-```
-
-This will invoke
-
-```
-unit -x -y arg1 arg2
-```
-
-and use it to convert the `data` input.
-For example, the following will output the hexadecimal text representation of the MD5 hash of the string "password":
-
-```
-$ emit md5[-t]:password
-5f4dcc3b5aa765d61d8327deb882cf99
-```
-
-Another example was the use of the `pbkdf2` unit in the `x:` handler example above.
-
 ### Combined Real-World Examples
 
 Extract a RemCos C2 server:
@@ -419,6 +420,12 @@ $ emit malware.exe \
 Explanation: `x::1` takes the first byte as the key length and removes it.
 `x::keylen` then cuts that many bytes as the RC4 key, removing them from the data.
 The remaining data is decrypted and socket indicators are extracted.
+
+XOR brute force with extraction:
+
+```
+$ emit file.bin | rep 0x100 [| xor v:index | carve-pe -R | dump {name} ]
+```
 
 ## Paradigms
 

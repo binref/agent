@@ -21,8 +21,8 @@ When this skill is active, prioritize binary refinery pipelines over custom code
 Binary Refinery is a collection of command-line tools for transforming binary data.
 Each tool is called a **unit** and reads from stdin and writes to stdout.
 Units are combined into **pipelines** using the `|` pipe operator.
-A unit always accepts its input via STDIN and sends its output to STDOUT; they cannot be called by passing a file name as argument.
-The correct pattern is: `emit file.bin | unit`
+Units cannot be called by passing a file name as argument; the correct pattern is `emit file.bin | unit`.
+All output is sent to STDOUT, debug messages and `peek` unit previews (see below) appear on STDERR.
 All Binary Refinery units exist as shell commands; use them.
 
 ## Mandatory Startup Protocol
@@ -37,7 +37,7 @@ Follow these steps **in order** at the beginning of each session:
 ## Operational Rules
 
 - Do not mix shell syntax (like environment variables) with refinery pipelines; there is a high risk of conflict.
-- Do not write Python scripts or use other shell tools for *data transformation*. Always use binary refinery units for that purpose.
+- Do not write Python scripts or use other shell tools for _data transformation_. Always use binary refinery units for that purpose.
   Shell utilities like `curl`, `file`, or `ls` for non-data-transformation tasks are fine.
 - Any data extraction task can be achieved by a binary refinery pipeline.
 - Before constructing a pipeline, run `binref [keyword]` to search for relevant keywords to enrich your unit discovery.
@@ -131,20 +131,8 @@ HELLO
 ### Unit-Based Handlers
 
 Binary refinery units can be used as a handler.
-Command-line arguments are passed to unit handlers in square brackets, separated by commas:
-
-```
-unit[-x,-y,arg1,arg2]:data
-```
-
-This will invoke
-
-```
-unit -x -y arg1 arg2
-```
-
-and use it to convert the `data` input.
-For example, the following will output the hexadecimal text representation of the MD5 hash of the string "password":
+Command-line arguments are passed in square brackets, separated by commas:
+`unit[-x,-y,arg1,arg2]:data` invokes `unit -x -y arg1 arg2` on the data.
 
 ```
 $ emit md5[-t]:password
@@ -176,13 +164,13 @@ Before writing regular expressions manually, consult the following table to see 
 | `winpath`  | Windows path                                  |
 | `nixpath`  | Unix path                                     |
 
-Here is one example for the documentation of the (somewhat niche) unit `datefix`, which can be used to normalize dates:
+Normalize dates in a text file using `datefix`:
 
 ```
 $ emit text.md | resub ((??date)) {1:datefix}
 ```
 
-In the output, all dates in the input text will have been replaced by their ISO representation.
+All dates in the input will have been replaced by their ISO representation.
 
 ## Framing Syntax
 
@@ -329,24 +317,20 @@ It is possible to make variables global by using the unit `mvg`, but it should r
 The following variables are automatically available on every chunk without needing `put`.
 They are computed on demand when accessed:
 
-| Variable  | Description                                             |
-| --------- | ------------------------------------------------------- |
-| `index`   | The chunk's index in the current frame (0-based)        |
-| `size`    | Byte count of the chunk                                 |
-| `magic`   | Human-readable file magic string                        |
-| `mime`    | MIME type according to file magic                       |
-| `ext`     | Guessed file extension from file magic                  |
-| `entropy` | Information entropy of the data                         |
-| `ic`      | Index of coincidence of the data                        |
-| `crc32`   | CRC32 hash (hexadecimal)                                |
-| `sha1`    | SHA-1 hash (hexadecimal)                                |
-| `sha256`  | SHA-256 hash (hexadecimal)                              |
-| `sha512`  | SHA-512 hash (hexadecimal)                              |
-| `md5`     | MD5 hash (hexadecimal)                                  |
-| `path`    | Virtual path (set by archive extractors like `xt`)      |
-| `offset`  | Offset where the chunk was found (set by `carve`/`rex`) |
+| Variable  | Comment                            |
+| --------- | ---------------------------------- |
+| `index`   | chunk index in the frame (0-based) |
+| `size`    | chunk size                         |
+| `magic`   | file magic description             |
+| `mime`    | MIME type                          |
+| `ext`     | best-fit file extension            |
+| `entropy` | information entropy of the data    |
 
-These can be used in format strings with `{name}` syntax and in multibin expressions with `v:name`.
+### Common Meta Variables
+
+Some units produce meta variables in addition to their output:
+- `offset`: Offset where data was found, set by `carve` and `rex`
+- `path`: Virtual path, set by archive extractors like `xt`.
 
 ### Conditional Filtering
 
@@ -367,8 +351,7 @@ The following multibin handlers interact with frame data and meta variables.
 
 ### Handler: `e:expression`
 
-Evaluates the given Python expression; this may use meta variables as variables within the expression.
-For example, if `expression` is an integer literal string, the result of this operation is the integer itself.
+Evaluates the given Python expression that can involve meta variables.
 For example, this computes the sum of all bytes in the input:
 
 ```
@@ -431,29 +414,19 @@ Avoid nesting them; instead use one after the other at the same frame depth:
 
 ```
 $ emit sample [ \
-  | push [| vsnip 0x200010:0x10 | sha256 | pop key ]  \
-  | push [| vsnip 0x200020:0x10 | pop iv ]            \
+  | push [| vsnip 0x200010:0x10 | sha256 | pop k\
+  | push [| vsnip 0x200020:0x10 | pop iv ]      \
   | vsnip 0x4AAB00:0x4500 | aes --iv=v:iv v:key | dump payload.bin ]
 ```
 
-### Peeking and Debugging
+### Output, Peeking, and Debugging
 
-- The unit `peek` produces a short (10 to 12 line) hex dump and metadata preview of the output.
+- Prioritize `peek` over `xxd` or `head` for inspecting output. It produces a short hex dump and metadata preview.
 - When `peek` is **not** the last unit in the pipeline, it forwards all input data, making it a useful debugging tool.
-- Prioritize using `peek` over `xxd` or `head` for getting an output preview.
-- Precisely control the length of the peek output by specifying `peek -l=<line-count>`
-- Use `peek -dd` if you expect plaintext data, or `peek -d` if decoded text lines should be truncated rather than wrapped.
-- Use `peek -b` to get a one-line hex preview.
-- Use `peek` inside a frame to inspect data at any point of a framed pipeline:
-  it allows you to peek each chunk individually.
-
-### Output Handling
-
-- If data must be written to disk, use the `dump` unit.
-- If data must only be inspected, use `peek` instead to avoid writing to disk.
-- For large text output, use `peek -dd` to get a readable plaintext preview.
-- Use `dump` with a path argument to write to a specific file: `dump output.bin`.
-- To write multiple chunks to separate files, use `dump {path}` or `dump chunk-{index}.bin` inside a frame.
+  Use it inside a frame to inspect each chunk individually.
+- `peek -dd` for plaintext, `peek -b` for a one-line hex preview.
+- Control peek length with `peek -l=<line-count>`.
+- To write data to disk, use the `dump` unit.
 
 ### Incremental Pipeline Construction
 
@@ -482,9 +455,9 @@ The following examples demonstrate complex multi-concept pipelines.
 Decode a `sockaddr_in` structure to human-readable `IP:Port`:
 
 ```
-$ emit "0x51110002 0xAFBAFA12" | pack -B4                     \
-  | struct 2x{port:!H}{addr:4}{} [                            \
-  | push v:addr | pack -R [| sep . ]| pop addr              \
+$ emit "0x51110002 0xAFBAFA12" | pack -B4       \
+  | struct 2x{port:!H}{addr:4}{} [              \
+  | push v:addr | pack -R [| sep . ]| pop addr  \
   | pf {addr}:{port} ]
 18.250.186.175:4433
 ```
@@ -535,26 +508,26 @@ $ emit capture.pcap | pcap [| rex "^GET\s[^\s]+" | sep ]
 Extract URLs from a malicious PDF's JavaScript:
 
 ```
-$ emit sample.pdf                                             \
-  | xt JS | carve -sd string | carve -sd string               \
+$ emit sample.pdf                               \
+  | xt JS | carve -sd string | carve -sd string \
   | url | xtp url [| urlfix | sep ]
 ```
 
 Recursively peel nested HTML + JS + base64 layers to extract a URL:
 
 ```
-$ emit sample.hta                                             \
-  | loop 8 xthtml[script]:csd[string]:url                     \
+$ emit sample.hta                               \
+  | loop 8 xthtml[script]:csd[string]:url       \
   | csd string | b64 | xtp url
 ```
 
 Extract C2 URL from a macro lure document with WSH-encoded variables:
 
 ```
-$ emit sample.docx | xt settings.xml                          \
-  | xtxml docVars/10* [| eat val ]                            \
-  | hex | wshenc | carve -dn5 string [                        \
-  | dedup | pop k | swap k | hex | xor v:k ]                  \
+$ emit sample.docx | xt settings.xml            \
+  | xtxml docVars/10* [| eat val ]              \
+  | hex | wshenc | carve -dn5 string [          \
+  | dedup | pop k | swap k | hex | xor v:k ]    \
   | xtp url
 ```
 
@@ -563,8 +536,8 @@ $ emit sample.docx | xt settings.xml                          \
 Solve a FlareOn ASCII-art challenge by stripping the art, decoding, and emulating x64 shellcode:
 
 ```
-$ emit challenge.bin                                          \
-  | resub | trim -ui flareon | b64 | zl                       \
-  | vstack -w10 -p9: -ax64 [                                  \
+$ emit challenge.bin                            \
+  | resub | trim -ui flareon | b64 | zl         \
+  | vstack -w10 -p9: -ax64 [                    \
   | sorted -a size | trim h:00 | pop key | xor v:key ]
 ```

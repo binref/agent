@@ -284,6 +284,7 @@ The result after applying handler 4 is what is passed to the unit.
 **WARNING.** In some units, **multibin suffixes** are used.
 This will be mentioned explicitly in the unit's help output when queried.
 If a unit notes that data is processed with a multibin suffix, it means that handlers are applied left to right rather than right to left.
+For example, in a format string `{field:hex:b64}`, the value of `field` is first processed by `hex`, then by `b64`.
 
 ### Handler: `h:hexstring`
 

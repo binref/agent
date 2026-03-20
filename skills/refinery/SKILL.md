@@ -410,6 +410,12 @@ $ emit malware.exe \
 
 ## Paradigms
 
+### Format String Expressions
+
+Some units use format string syntax using curly braces, most notably `rex`, `resub`, `struct`, and `pf`.
+These expressions can access meta variables and allow post-processing with multibin suffixes.
+For detailed information, see the help output of each such unit.
+
 ### Data Extraction Upfront
 
 When an operation requires multiple input streams (e.g., data, key1, key2), a common approach is:

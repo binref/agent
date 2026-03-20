@@ -360,7 +360,17 @@ Copies 3 bytes starting at offset 2 (i.e. `CDE`).
 
 Same as `c:`, but **removes** the extracted bytes from the input data.
 All `x:` operations are performed in the order arguments appear on the command line.
-This is extremely useful for protocols where keys or IVs are prepended to ciphertext:
+
+Simple example — extract a 4-byte header and store it, then process the remaining data:
+
+```
+$ emit HDRPAYLOADDATA [| put header x::3 | pf {header}:{} ]
+HDR:PAYLOADDATA
+```
+
+Here, `x::3` extracts the first 3 bytes into `header` and removes them; the chunk becomes `PAYLOADDATA`.
+
+This is also useful for protocols where keys or IVs are prepended to ciphertext:
 
 ```
 $ emit data | aes --mode cbc --iv=x::16 pbkdf2[32,salted]:x::10

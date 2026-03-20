@@ -420,14 +420,6 @@ Explanation: `x::1` takes the first byte as the key length and removes it.
 `x::keylen` then cuts that many bytes as the RC4 key, removing them from the data.
 The remaining data is decrypted and socket indicators are extracted.
 
-Extract an AgentTesla configuration:
-
-```
-$ emit malware.exe \
-  | dnfields [| aes x::32 --iv x::16 -Q | sep ] \
-  | rex -M "((??email))\n(.*)\n(.*)\n:Zone" addr={1} pass={2} host={3}
-```
-
 ## Paradigms
 
 ### Format String Expressions
@@ -499,20 +491,6 @@ catching errors early and making debugging straightforward.
 
 The following examples demonstrate complex multi-concept pipelines.
 
-### Carving & Extraction
-
-Carve the largest base64 blob from a file and decode it:
-
-```
-$ emit packed.bin | carve -l -t1 b64 | b64 | dump payload.bin
-```
-
-Carve a ZIP from a buffer, extract a DLL, and show PE metadata:
-
-```
-$ emit file.bin | carve-zip | xtzip file.dll | pemeta
-```
-
 ### Data Parsing & Formatting
 
 Decode a `sockaddr_in` structure to human-readable `IP:Port`:
@@ -523,13 +501,6 @@ $ emit "0x51110002 0xAFBAFA12" | pack -B4                     \
   | push v:addr | pack -R [| sep . ]| pop addr              \
   | pf {addr}:{port} ]
 18.250.186.175:4433
-```
-
-Convert a network-byte-order IP integer to dotted notation:
-
-```
-$ emit 0xC0A80C2A | pack -EB4 | pack -R [| sep . ]
-192.168.12.42
 ```
 
 Parse repeating 3-byte structs and format with extracted variables:
@@ -567,15 +538,6 @@ LL
 OD
 ```
 
-### Push/Pop Patterns
-
-Reassemble chunks using `jamv` to name them by size, then format:
-
-```
-$ emit R ry The Bina efine [| jamv c{size} | pf {c3} {c4}{c2} {c1}{c5}{c2} ]
-The Binary Refinery
-```
-
 ### Malware Analysis
 
 Extract HTTP GET requests from a PCAP:
@@ -610,15 +572,6 @@ $ emit sample.docx | xt settings.xml                          \
   | xtp url
 ```
 
-Warzone RAT — extract C2 server from the `.bss` section:
-
-```
-$ emit sample.exe                                             \
-  | vsect .bss | struct I{key:{}}{} [                         \
-  | rc4 v:key                                                 \
-  | struct I{host:{}}{port:H} {host:u16}:{port} ]
-```
-
 ### Virtual Stack Emulation
 
 Solve a FlareOn ASCII-art challenge by stripping the art, decoding, and emulating x64 shellcode:
@@ -628,14 +581,4 @@ $ emit challenge.bin                                          \
   | resub | trim -ui flareon | b64 | zl                       \
   | vstack -w10 -p9: -ax64 [                                  \
   | sorted -a size | trim h:00 | pop key | xor v:key ]
-```
-
-Extract URL from an Equation Editor exploit by emulating embedded shellcode:
-
-```
-$ emit exploit.doc                                            \
-  | officecrypt | xt oleObject1 | xt native                   \
-  | rex "\xE9(.*)"                                            \
-  | vstack -b 0x8000 -a=x32 -w=40 --ic 0x8000                 \
-  | xtp -ff
 ```

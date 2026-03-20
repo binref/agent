@@ -468,28 +468,9 @@ $ emit sample [ \
 
 ## Examples
 
-### Encoding, Hashing & Carving
+The following examples demonstrate complex multi-concept pipelines.
 
-Base64 → zlib → hex decode chain:
-
-```
-$ emit M7EwMzVzBkI3IwNTczM3cyMg2wQA | b64 | zl | hex
-Hello World
-```
-
-Reverse: encode text to base64 via hex and zlib:
-
-```
-$ emit "Hello World" | hex -R | zl -R | b64 -R
-M7EwMzVzBkI3IwNTczM3cyMg2wQA
-```
-
-Pack numeric expressions to binary and display as hex string:
-
-```
-$ emit "0xBA 0xAD 0xC0 0xFF 0xEE" | pack | hex -R
-BAADC0FFEE
-```
+### Carving & Extraction
 
 Carve the largest base64 blob from a file and decode it:
 
@@ -530,33 +511,7 @@ x=65
 y=68
 ```
 
-### Filtering & Conditional Logic
-
-Keep only chunks whose size exceeds 3 bytes:
-
-```
-$ emit Tim Ada Jake Elisabeth James Meredith [| iffc 4: | sep ]
-Jake
-Elisabeth
-James
-Meredith
-```
-
-Select the first chunk matching a condition (`x == c`):
-
-```
-$ emit a b c c d [| put x | iff x -eq c | pick 0 ]
-c
-```
-
 ### Frame Manipulation
-
-Nested triple frame with a separator at level 2:
-
-```
-$ emit FOOBARBAZ [| chop 3 [| chop 1 [| ccp c::1 ]| sep , ]]
-FFOOOO,BBAARR,BBAAZZ
-```
 
 Reduce a frame by successively appending chunks (reverses order):
 
@@ -584,13 +539,6 @@ OD
 ```
 
 ### Push/Pop Patterns
-
-Push/pop to extract a prefix and prepend it:
-
-```
-$ emit "FOO BAR" [| push | snip :4 | pop oof | ccp v:oof ]
-FOO FOO BAR
-```
 
 Reassemble chunks using `jamv` to name them by size, then format:
 
@@ -640,33 +588,6 @@ $ emit sample.exe                                             \
   | vsect .bss | struct I{key:{}}{} [                         \
   | rc4 v:key                                                 \
   | struct I{host:{}}{port:H} {host:u16}:{port} ]
-```
-
-Full pipeline to extract C2 servers from an unpacked Qakbot sample.
-First, the string table is decrypted by pattern-matching the decryption routine's opcodes,
-then every decrypted string is brute-forced as the key for the configuration resource.
-A SHA1 checksum validates the correct key:
-
-```
-$ emit sample.exe [[                                          \
-  | put backup [                                              \
-  | rex "\x51\x68(....)\xBA(..\0\0)\xB9(....)\xE8" {1}{3}{2}  \
-  | struct {ka:L}{da:L}{dl:L}                                 \
-  | put key vsnip[ka:128]:v:backup                            \
-  | emit vsnip[da:dl]:v:backup                                \
-  | xor v:key ]                                               \
-  | resplit h:00                                              \
-  | swap key                                                  \
-  | swap backup                                               \
-  | perc RCDATA [| max size ]                                 \
-  | rc4 sha1:v:key                                            \
-  | put required x::20                                        \
-  | put computed sha1:c:                                      \
-  | iff required -eq computed                                 \
-  | rc4 x::20                                                 \
-  | snip 20:                                                  \
-  | rex '(\x01.{7})+' ]                                       \
-  | struct -m !xBBBBHx {1}.{2}.{3}.{4}:{5} [| sep ]
 ```
 
 ### Virtual Stack Emulation

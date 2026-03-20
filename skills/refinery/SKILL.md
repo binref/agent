@@ -277,6 +277,7 @@ This takes the input string, evaluates it using the default handler, then succes
 The result after applying handler 4 is what is passed to the unit.
 
 **WARNING.** In some units, **multibin suffixes** are used.
+This will be mentioned explicitly in the unit's help output when queried.
 If a unit notes that data is processed with a multibin suffix, it means that handlers are applied left to right rather than right to left.
 
 ### Handler: `h:hexstring`

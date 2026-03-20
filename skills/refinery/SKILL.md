@@ -50,26 +50,26 @@ Before writing regular expressions manually, consult the following table to see 
 
 | Pattern     | Matches                                                                            |
 | ----------- | ---------------------------------------------------------------------------------- |
-| `int`       | A single integer (decimal)                                                         |
-| `str`       | A quoted c-string literal                                                          |
-| `ps1str`    | A quoted PowerShell string literal                                                 |
-| `vbastr`    | A quoted VisualBasic string literal                                                |
-| `intarray`  | A comma-separated list of integers                                                 |
-| `strarray`  | A comma-separated list of quoted strings                                           |
-| `hexarray`  | A comma-separated list of hex-encoded values                                       |
+| `url`       | A URL                                                                              |
+| `ipv4`      | An IPv4 address                                                                    |
 | `socket`    | A domain name or an IPv4 address, followed by a colon and a port number            |
 | `host`      | A domain name or an IPv4 address, optionally followed by a colon and a port number |
 | `domain`    | A domain name                                                                      |
-| `ipv6`      | An IPv6 address                                                                    |
-| `ipv4`      | An IPv4 address                                                                    |
-| `url`       | A URL                                                                              |
-| `date`      | An expression that matches on various date formats                                 |
 | `email`     | An email address                                                                   |
-| `b64`       | A base64-encoded blob                                                              |
 | `hex`       | A hexadecimal string                                                               |
+| `b64`       | A base64-encoded blob                                                              |
+| `str`       | A quoted c-string literal                                                          |
+| `ps1str`    | A quoted PowerShell string literal                                                 |
+| `vbastr`    | A quoted VisualBasic string literal                                                |
+| `int`       | A single integer (decimal)                                                         |
+| `intarray`  | A comma-separated list of integers                                                 |
+| `strarray`  | A comma-separated list of quoted strings                                           |
+| `hexarray`  | A comma-separated list of hex-encoded values                                       |
+| `ipv6`      | An IPv6 address                                                                    |
 | `guid`      | A GUID/UUID                                                                        |
-| `nixpath`   | A Unix path                                                                        |
+| `date`      | An expression that matches on various date formats                                 |
 | `winpath`   | A Windows path                                                                     |
+| `nixpath`   | A Unix path                                                                        |
 | `path`      | Any path                                                                           |
 | `printable` | Printable text                                                                     |
 

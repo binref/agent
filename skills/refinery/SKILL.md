@@ -335,7 +335,7 @@ Extract an AgentTesla configuration:
 
 ```
 $ emit fb47a566911905d37bdb464a08ca66b9078f18f10411ce019e9d5ab747571b40 \
-  | dnfields [| aes x::32 --iv x::16 -Q ]] \
+  | dnfields [| aes x::32 --iv x::16 -Q | sep ] \
   | rex -M "((??email))\n(.*)\n(.*)\n:Zone" addr={1} pass={2} host={3}
 ```
 
@@ -519,7 +519,7 @@ Extract URLs from a malicious PDF's JavaScript:
 ```
 $ emit sample.pdf                                             \
   | xt JS | carve -sd string | carve -sd string               \
-  | url | xtp url [| urlfix ]]
+  | url | xtp url [| urlfix | sep ]
 ```
 
 Recursively peel nested HTML + JS + base64 layers to extract a URL:

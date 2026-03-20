@@ -32,7 +32,7 @@ Follow these steps **in order** at the beginning of each session:
 1. Run `binref -g` to get a complete overview of all available units.
    This is **essential** — units you don't know about cannot be discovered later by guessing.
    If the output is truncated, re-run the command redirecting to a temporary file and read that file.
-2. Run `binref -h` to understand how to use the search tool.
+2. Run `binref -h` to learn the search syntax for discovering units by keyword.
 
 ## Operational Rules
 

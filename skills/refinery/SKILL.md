@@ -263,6 +263,10 @@ $ emit malware.exe [                                                          \
   | sep ]
 ```
 
+`dnfields` extracts all .NET fields, then each is AES-decrypted using a 32-byte prefix key and 16-byte IV;
+`-T` silences failures so only the successfully decrypted field survives.
+`rex` with named patterns for `email` and `host` pulls the indicators from the decrypted strings.
+
 ## Meta Variables
 
 Meta variables are key-value pairs attached to each chunk inside a frame.
@@ -279,8 +283,7 @@ $ emit FOO [| put x BAR | cca v:x | sep ]
 FOOBAR
 ```
 
-Here, we use the multibin handler `v:` which retrieves the value of a meta variable.
-The value of the multibin expression `v:x` is therefore `BAR`, the value we stored in `x` using `put`.
+[`v:x` retrieves the meta variable's value (`BAR`); full details are in Frame-Dependent Multibin Handlers below.]
 
 ### Push and Pop
 

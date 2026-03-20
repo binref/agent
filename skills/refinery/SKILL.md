@@ -132,7 +132,7 @@ FOOBAR
 
 ### Push and Pop
 
-The unit `push` duplicates the current data.
+The unit `push` inserts new data into the frame, defaulting to the current chunk unless a (multibin) argument is provided.
 The original is moved out of scope (invisible), and the copy remains visible for a sub-pipeline.
 Conversely, `pop varname` consumes the visible chunk(s), stores them as the variable `varname`, and restores the original:
 

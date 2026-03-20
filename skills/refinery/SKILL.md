@@ -26,7 +26,7 @@ All Binary Refinery units exist as shell commands; use them.
 
 ## Rules of Engagement
 
-- Try not to write Python scripts or other programs, refrain from using other shell commands; prioritize binary refinery units.
+- Do not write Python scripts or use other shell tools. Always use binary refinery units.
 - Any data extraction task can be achieved by a binary refinery pipeline.
 - **IMPORTANT.** At the beginning of each session, run `binref -b` to get a complete overview of all available units,
   **If the output is truncated, read the full output file before proceeding!**

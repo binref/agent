@@ -124,7 +124,7 @@ Explanation: `chop 2` splits `OOOOOOOO` into the frame `[OO, OO, OO, OO]`.
 Inside the frame, `ccp F` prepends `F` to each chunk and `cca .` appends a period.
 The closing `]` on `cca` concatenates all chunks back together.
 
-### CRITICAL RULE: Always Start With an Outer Frame
+### Frames Are Essential
 
 **Always begin every pipeline with an outer frame** when you intend to use meta variables,
 `put`, `pop`, `push`, `iff`, or any frame-dependent operation.

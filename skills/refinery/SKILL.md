@@ -224,7 +224,7 @@ FOO.
 
 ### Squeezing
 
-Specify `[]` as the nesting instruction to fuse all output chunks into one by concatenating them:
+Specify `[]` as the nesting instruction (a single argument, distinct from the separate `[` and `]` used to open/close frames) to fuse all output chunks into one by concatenating them:
 
 ```
 $ emit XYXYXYXY | chop 4 [| snip 0::2 1::2 []| sep ]

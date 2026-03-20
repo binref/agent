@@ -459,7 +459,9 @@ catching errors early and making debugging straightforward.
 
 ### Debugging Failing Pipelines
 
-- Bisect failing pipelines by inserting `peek` statements. Move `peek` left or right to find where extraction produces unexpected results.
+- If a pipeline produces no output or wrong output, bisect it by inserting `peek` statements.
+  Move `peek` left or right to find where extraction produces unexpected results.
+- If you used `-T` or `-Q` and the output looks wrong, remove these flags and re-run to see the actual error messages.
 - Use the `-v` flag on individual units to increase their output verbosity to identify root causes.
 
 ## Examples

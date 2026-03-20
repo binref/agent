@@ -34,7 +34,7 @@ Follow these steps **in order** at the beginning of each session:
 
 ## Operational Rules
 
-- Do not mix shell syntax (like environment variables) with refinery pipelines; there is a high risk of conflict.
+- Do not mix shell syntax (especially environment variables) with refinery pipelines; there is a high risk of conflict.
 - Do not write Python scripts or use other shell tools for _data transformation_. Always use binary refinery units for that purpose.
   Shell utilities like `curl`, `file`, or `ls` for non-data-transformation tasks are fine.
 - Before constructing a pipeline, run `binref [keyword]` to search for relevant keywords to enrich your unit discovery.

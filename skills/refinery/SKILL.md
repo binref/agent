@@ -266,7 +266,7 @@ FOOBAR
 ```
 
 The multibin expression `v:x` retrieves the meta variable's value (`BAR`);
- full details are in Frame-Dependent Multibin Handlers below.
+full details are in Frame-Dependent Multibin Handlers below.
 
 ### Push and Pop
 
@@ -329,6 +329,7 @@ They are computed on demand when accessed:
 ### Common Meta Variables
 
 Some units produce meta variables in addition to their output:
+
 - `offset`: Offset where data was found, set by `carve` and `rex`
 - `path`: Virtual path, set by archive extractors like `xt`.
 

@@ -466,6 +466,32 @@ $ emit sample [ \
 - Use `peek` inside a frame to inspect data at any point of a framed pipeline:
   it allows you to peek each chunk individually.
 
+### Output Handling
+
+- If data must be written to disk, use the `dump` unit.
+- If data must only be inspected, use `peek` instead to avoid writing to disk.
+- For large text output, use `peek -dd` to get a readable plaintext preview.
+- Use `dump` with a path argument to write to a specific file: `dump output.bin`.
+- To write multiple chunks to separate files, use `dump {path}` or `dump chunk-{index}.bin` inside a frame.
+
+### Incremental Pipeline Construction
+
+For pipelines with more than 3 stages, build incrementally:
+
+1. Start with the first 1-2 units and `peek` to verify the output.
+2. Show the intermediate result to the user.
+3. Add the next 1-2 units, `peek` again, and verify.
+4. Repeat until the full pipeline is complete.
+
+Never construct a pipeline with 5 or more stages in a single attempt.
+Each intermediate `peek` validates assumptions about the data format at that stage,
+catching errors early and making debugging straightforward.
+
+### Debugging Failing Pipelines
+
+- Bisect failing pipelines by inserting `peek` statements. Move `peek` left or right to find where extraction produces unexpected results.
+- Use the `-v` flag on individual units to increase their output verbosity to identify root causes.
+
 ## Examples
 
 The following examples demonstrate complex multi-concept pipelines.

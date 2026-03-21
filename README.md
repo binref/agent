@@ -4,7 +4,7 @@ This repository stores a [Claude][ai] skill for [Binary Refinery][br].
 It can augment your malware analysis agent with a number of useful tools for data extraction and transformation.
 
 > [!CAUTION]
-> Make sure you are using refinery version 0.10.3 or later.
+> Make sure you are using refinery **version 0.10.5** or later.
 > The agent relies on changes to the `binref` utility that were introduced here.
 
 > [!NOTE]

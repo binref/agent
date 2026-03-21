@@ -31,10 +31,13 @@ All output is sent to STDOUT, debug messages and `peek` unit previews (see below
 
 Follow these steps **in order** at the beginning of each session:
 
-1. Run `binref -g` to get a complete overview of all available units.
+1. Run `binref -V` to get the current refinery version. It must be **at least 0.10.5**.
+   If the version is too low, abort here and prompt the user to update;
+   suggest the following command: `python -m pip install -U binary-refinery`
+2. Run `binref -g` to get a complete overview of all available units.
    This is **essential** — units you don't know about cannot be discovered later by guessing.
    If the output is truncated, re-run the command redirecting to a temporary file and read that file.
-2. Run `binref -h` to learn the search syntax for discovering units by keyword.
+3. Run `binref -h` to learn the search syntax for discovering units by keyword.
 
 If these commands do not exist, install binary refinery by:
 
@@ -471,7 +474,7 @@ catching errors early and making debugging straightforward.
 
 ### Debugging Failing Pipelines
 
-- When `peek` is **not** the last unit in the pipeline, it forwards all input data, making it a useful debugging tool.
+- `peek` forwards all input data, making it a useful debugging tool.
   Use it inside a frame to inspect each chunk individually.
 - If a pipeline produces no output or wrong output, bisect it by inserting `peek` statements.
   Move `peek` left or right to find where extraction produces unexpected results.

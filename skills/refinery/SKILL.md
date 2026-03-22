@@ -67,6 +67,7 @@ and your instincts about the syntax, without proper research, will be **wrong**.
 - Use `peek` as your universal data preview tool.
   Run `peek -l0` instead of `file`, `peek -dd` instead of `head`, and simply `peek` instead of `xxd`.
   Control peek length with `peek -l=<line-count>`.
+  If you use `peek` as the final unit in a pipeline, use the `-2` switch to prevent input data from being forwarded and leaking into the output.
 - To write data to disk, use the `dump` unit.
 - Whenever you are extracting data based on patterns, use the `carve` unit.
 - Whenever you are extracting indicators from data, use `xtp`.

@@ -417,6 +417,24 @@ The unit `pick` selects chunks by index from a frame.
 For example, `pick 0 2:` returns all chunks except the one at index 1.
 `pick 0` returns only the first chunk. `pick ::-1` reverses the order of chunks.
 
+### Scoping
+
+Unlike `pick`, which removes chunks from the frame, `scope` restricts subsequent operations to selected chunks while the rest pass through unchanged.
+Use Python slice syntax: `scope ::2` selects every other chunk, `scope 1:` skips the first, `scope 0 3 5` selects by index.
+
+This is essential when a frame contains a mix of chunks that need different treatment.
+Rather than extracting items individually into separate pipelines,
+extract them all into one frame and use `scope` to target the subset that needs transformation:
+
+```
+$ emit AABBCC | chop 2 [| scope ::2 | map AB XY | sep ]
+XY
+BB
+XY
+```
+
+`scope ::2` restricts `map` to chunks 0 and 2 (`AA` and `CC`), leaving chunk 1 (`BB`) untouched.
+
 ## Frame-Dependent Multibin Handlers
 
 The following multibin handlers interact with frame data and meta variables.

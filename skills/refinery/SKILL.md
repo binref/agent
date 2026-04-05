@@ -435,6 +435,19 @@ XY
 
 `scope ::2` restricts `map` to chunks 0 and 2 (`AA` and `CC`), leaving chunk 1 (`BB`) untouched.
 
+Each `scope` call selects a fresh subset — it does not narrow the previous one.
+This means sequential `scope` calls can apply different operations to different subsets of the same frame:
+
+```
+$ emit AABBCCDD | chop 2 [| scope 0 2 | map AC WY | scope 1 3 | map BD XZ ]
+WWXXYYZZ
+```
+
+Chunks 0 and 2 have `AB` mapped to `XY`; chunks 1 and 3 have `CD` mapped to `ZW`.
+The closing `]` concatenates all four results in their original order.
+
+Use `scope` when chunks need different treatments; use `push`/`pop` when you need to derive an auxiliary value (a key, IV, or length) from the data for use in a later operation.
+
 ## Frame-Dependent Multibin Handlers
 
 The following multibin handlers interact with frame data and meta variables.

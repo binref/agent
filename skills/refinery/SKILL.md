@@ -97,6 +97,17 @@ Composing low-level units to replicate what a single high-level unit already doe
  — it is slower, more error-prone, and misses edge cases the high-level unit already handles.
 Recognizing a data format is not a reason to skip discovery; it is the signal to search, because you now have good keywords.
 
+## Null Result Rule
+
+When a pipeline produces empty, missing, or unexpectedly small output where you expected data to exist, 
+that is not a conclusion — it is an anomaly.
+Before accepting such a result, strip all post-processing and run the producing unit by itself to verify the observation.
+Only after this isolated check confirms the absence may you conclude the data is truly not there.
+
+**Why this rule exists.**
+A pipeline that runs without errors can still silently discard data;
+this can be by design or because you used a post-processing step that worked different from what you expected.
+
 ## Unit Lookup Strategy
 
 When searching for units, pursue the following iterative approach:
@@ -478,8 +489,9 @@ $ emit sample [                                     \
 For pipelines with more than 3 stages, build incrementally:
 
 1. Start with the first 1-2 units and `peek` to verify the output.
-2. Identify the output artifact type. If it is a recognizable format,
-   apply the **Layer Boundary Rule** before adding more stages.
+2. Identify the output artifact type:
+   - If it is a recognizable format, apply the **Layer Boundary Rule** before adding more stages.
+   - If it is empty, missing, or unexpectedly small, apply the **Null Result Rule**.
 3. Show the intermediate result to the user.
 4. Add the next 1-2 units, `peek` again, and verify.
 5. Repeat until the full pipeline is complete.

@@ -79,10 +79,23 @@ and your instincts about the syntax, without proper research, will be **wrong**.
 - The `-Q` flag silences exceptions and returns no output when execution fails.
 - When constructing a pipeline that ingests file data, pass file paths as literal strings to `emit`.
   Never assign paths to shell variables first; it conflicts with multibin expression parsing and produces wrong results.
-- When dealing with obfuscated or encrypted data, exhaust the discovery process (`binref [keyword]`)
-  for units that can handle it automatically before resorting to manual inspection.
 - When a unit produces errors or incomplete output, debug it.
   Do not abandon a conceptually correct unit after a single failure.
+
+## Layer Boundary Rule
+
+Every time a pipeline stage produces output that you recognize as a distinct artifact type
+ — a script, an executable, an archive, a document, or any structured format —
+you **must** search for a unit that consumes that artifact type directly before proceeding.
+
+1. Name the artifact type in one or two words (e.g., "obfuscated PowerShell", "PE executable", "ZIP archive").
+2. Run `binref [-o] [artifact-type keywords]` to search for a unit that handles it.
+3. Only if no suitable high-level unit exists, decompose into low-level sub-operations.
+
+**Why this rule exists.**
+Composing low-level units to replicate what a single high-level unit already does is the refinery equivalent of writing a bespoke script
+ — it is slower, more error-prone, and misses edge cases the high-level unit already handles.
+Recognizing a data format is not a reason to skip discovery; it is the signal to search, because you now have good keywords.
 
 ## Unit Lookup Strategy
 
@@ -465,9 +478,11 @@ $ emit sample [                                     \
 For pipelines with more than 3 stages, build incrementally:
 
 1. Start with the first 1-2 units and `peek` to verify the output.
-2. Show the intermediate result to the user.
-3. Add the next 1-2 units, `peek` again, and verify.
-4. Repeat until the full pipeline is complete.
+2. Identify the output artifact type. If it is a recognizable format,
+   apply the **Layer Boundary Rule** before adding more stages.
+3. Show the intermediate result to the user.
+4. Add the next 1-2 units, `peek` again, and verify.
+5. Repeat until the full pipeline is complete.
 
 Never construct a pipeline with 5 or more stages in a single attempt.
 Each intermediate `peek` validates assumptions about the data format at that stage,

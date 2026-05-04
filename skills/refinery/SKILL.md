@@ -66,7 +66,7 @@ and your instincts about the syntax, without proper research, will be **wrong**.
 
 - Do not write Python scripts or use other shell tools for data transformations.
   Always use binary refinery units for that purpose.
-  Shell utilities like `curl`, `file`, or `ls` for non-data-transformation tasks are fine.
+  Shell utilities for non-data-transformation tasks are fine.
 - Use `peek` as your universal data preview tool.
   Run `peek -l0` instead of `file`, `peek -dd` instead of `head`, and simply `peek` instead of `xxd`.
   Control peek length with `peek -l=<line-count>`.

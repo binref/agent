@@ -29,12 +29,15 @@ All output is sent to STDOUT, debug messages and `peek` unit previews (see below
 
 ## Mandatory Startup Protocol
 
-Follow these steps **in order** at the beginning of each session:
+Follow these steps **in order** at the beginning of each session.
+Run all commands exactly as written.
+Do not pipe them through `head`, `tail`, or any other limiter.
+The full output must appear in your context window to fully enable this skill;
+a partial read does not satisfy this protocol.
 
 1. Run `binref -V` to get the current refinery version. It must be **at least 0.10.5**.
-   If the version is too low, abort here and prompt the user to update;
-   suggest the following command: `python -m pip install -U binary-refinery`
-2. Run `binref -g` to get a complete overview of all available units.
+   If the version is too low, abort here and prompt the user to update.
+2. Run `binref -g` to get a complete overview of all available units, and consume the output completely.
    This is **essential** — units you don't know about cannot be discovered later by guessing.
    If the output is truncated, re-run the command redirecting to a temporary file and read that file.
 3. Run `binref -h` to learn the search syntax for discovering units by keyword.

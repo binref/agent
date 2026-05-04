@@ -47,21 +47,6 @@ If these commands do not exist, install binary refinery by:
 1. Creating a dedicated virtual environment for this project or activating the one it uses.
 2. Run: `pip install binary-refinery`
 
-## Critical Rule
-
-**IMPORTANT.** The inclusion of **any** unit in **any** pipeline for **any** reason is **invalid**
-unless this unit is invoked with the `-?` switch earlier in the session transcript.
-If it does not appear, run it now. There are **no exceptions to this rule**.
-Check this before every unit call, every pipeline construction,
-and also do this when you intend to use the unit as a multibin handler (see below).
-
-If you find yourself copying a unit invocation from the examples section, **STOP**.
-Run the unit with `-?` first. The examples are illustrations, not templates to copy verbatim.
-
-If the `-?` output is truncated, re-run the command redirecting to a temporary file and read that file.
-This is **essential** — information you miss from an interface **cannot later be guessed**
-and your instincts about the syntax, without proper research, will be **wrong**.
-
 ## Operational Rules
 
 - Do not write Python scripts or use other shell tools for data transformations.
@@ -84,6 +69,23 @@ and your instincts about the syntax, without proper research, will be **wrong**.
   Never assign paths to shell variables first; it conflicts with multibin expression parsing and produces wrong results.
 - When a unit produces errors or incomplete output, debug it.
   Do not abandon a conceptually correct unit after a single failure.
+
+## Help First Rule
+
+The inclusion of **any** unit in **any** pipeline for **any** reason is **invalid**
+unless said unit is invoked with the `-?` switch earlier in the session transcript.
+If it does not appear, run it before using the unit. There are **no exceptions to this rule**.
+Check this before every unit call, every pipeline construction,
+and also do this when you intend to use the unit as a multibin handler (see below).
+
+If you find yourself copying a unit invocation from the examples section, **stop**.
+Run the unit with `-?` first. The examples are illustrations, not templates to copy verbatim.
+
+If the `-?` output is truncated, re-run the command redirecting to a temporary file and read that file.
+
+**Why this rule exists.**
+Information you miss from an interface **cannot later be guessed** and your instincts about the syntax,
+without proper research, will be **wrong**.
 
 ## Layer Boundary Rule
 

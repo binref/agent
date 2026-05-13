@@ -35,7 +35,7 @@ Do not pipe them through `head`, `tail`, or any other limiter.
 The full output must appear in your context window to fully enable this skill;
 a partial read does not satisfy this protocol.
 
-1. Run `binref -V` to get the current refinery version. It must be **at least 0.10.5**.
+1. Run `binref -V` to get the current refinery version. It must be **at least 0.11.0**.
    If the version is too low, abort here and prompt the user to update.
 2. Run `binref -g` to get a complete overview of all available units, and consume the output completely.
    This is **essential** — units you don't know about cannot be discovered later by guessing.
@@ -73,15 +73,15 @@ If these commands do not exist, install binary refinery by:
 ## Help First Rule
 
 The inclusion of **any** unit in **any** pipeline for **any** reason is **invalid**
-unless said unit is invoked with the `-?` switch earlier in the session transcript.
+unless said unit is invoked with the `-H` switch earlier in the session transcript.
 If it does not appear, run it before using the unit. There are **no exceptions to this rule**.
 Check this before every unit call, every pipeline construction,
 and also do this when you intend to use the unit as a multibin handler (see below).
 
 If you find yourself copying a unit invocation from the examples section, **stop**.
-Run the unit with `-?` first. The examples are illustrations, not templates to copy verbatim.
+Run the unit with `-H` first. The examples are illustrations, not templates to copy verbatim.
 
-If the `-?` output is truncated, re-run the command redirecting to a temporary file and read that file.
+If the `-H` output is truncated, re-run the command redirecting to a temporary file and read that file.
 
 **Why this rule exists.**
 Information you miss from an interface **cannot later be guessed** and your instincts about the syntax,

@@ -14,8 +14,6 @@ description: >
 
 # Binary Refinery - Agent Skill Guide
 
-When this skill is active, prioritize binary refinery pipelines over custom code for all data transformation tasks.
-
 Binary Refinery is a collection of command-line tools for transforming binary data.
 Each tool is a **unit** that reads from stdin and writes to stdout.
 Units are combined into **pipelines** using the `|` pipe operator.
@@ -261,9 +259,7 @@ The closing `]` on `cca` concatenates all chunks back together.
 
 ### Frames Are Essential
 
-**Always begin every pipeline with an outer frame** when you intend to use meta variables,
-`put`, `pop`, `push`, `iff`, or any frame-dependent operation.
-Without an outer frame, meta variables do not function and units like `put`, `pop`, `iff`, and `pick` will not work.
+**Always begin every pipeline with an outer frame** when you intend to use meta variables or any frame-dependent unit (`put`, `pop`, `push`, `iff`, `pick`); without one, these do not function.
 
 ### Frame Nesting
 
@@ -520,10 +516,8 @@ For details, see the help output of each such unit.
 
 When a format-string unit specifies **multiple output slots** (e.g., `rex pattern {1} {2} {3}`),
 each slot produces a **separate chunk** per match.
-A regex with 3 groups and 3 output slots emits 3 chunks per match into the frame —
-functionally equivalent to `snip` or `vsnip` producing multiple extraction results.
-This means `rex` (and similar) can replace `vsnip` as the source in a "Data Extraction Upfront" pattern
-whenever the fields are identified by pattern rather than fixed offset.
+A regex with 3 groups and 3 output slots emits 3 chunks per match into the frame,
+so `rex` can serve as a multi-output source in the **Data Extraction Upfront** pattern below whenever fields are identified by pattern rather than fixed offset.
 
 ### Data Extraction Upfront
 

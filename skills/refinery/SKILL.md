@@ -297,6 +297,26 @@ FOO.
 FOO.
 ```
 
+### Nesting to Group Multi-Output Chunks
+
+When a unit emits N chunks per match (see Format String Expressions),
+open a nested frame with `[[` to group each match's outputs for paired processing:
+
+```
+$ emit "name1=4142,name2=4344,name3=4546" | rex (\w+)=(\w+) {1} {2} [[| pop label ]| hex | pf {label}={} | sep ]
+name1=AB
+name2=CD
+name3=EF
+```
+
+Without `[[`, the 6 chunks (`name1`,`4142`,`name2`,`4344`,`name3`,`4546`) would be a flat frame
+and `pop label` would consume only the first chunk globally.
+With `[[`, each pair `[label, hex_value]` becomes its own sub-frame,
+so `pop label` takes the first element of each pair as a variable and leaves the second as the data to process.
+
+This is the standard pattern when `rex` produces both **metadata** (names, keys, IVs) and **payload** chunks from the same match:
+nest the outputs, `pop` the metadata into variables, process the remaining payload.
+
 ### Squeezing
 
 Specify `[]` as the nesting instruction (a single argument, distinct from the separate `[` and `]` used to open/close frames) to fuse all output chunks into one by concatenating them:
@@ -368,6 +388,15 @@ Notably, `pop` can extract more than one chunk from the frame:
 $ emit binary refinery go [| pop b r | pf {} {b} {r} ]
 go binary refinery
 ```
+
+Since `pop` arguments are multibin expressions, handlers can transform chunks during extraction:
+
+```
+$ emit "414243" DEADBEEF [| pop key:hex | pf {key} has {} ]
+ABC has DEADBEEF
+```
+
+`:hex` hex-decodes the chunk before storing it in `key`. This avoids a separate `push`/decode/`pop` round-trip when the stored form differs from the raw chunk.
 
 ### Variable Scope
 
@@ -498,6 +527,13 @@ Some units use format string syntax using curly braces, most notably `rex`, `res
 These expressions can access meta variables and allow post-processing with multibin suffixes.
 For detailed information, see the help output of each such unit.
 
+When a format-string unit specifies **multiple output slots** (e.g., `rex pattern {1} {2} {3}`),
+each slot produces a **separate chunk** per match.
+A regex with 3 groups and 3 output slots emits 3 chunks per match into the frame —
+functionally equivalent to `snip` or `vsnip` producing multiple extraction results.
+This means `rex` (and similar) can replace `vsnip` as the source in a "Data Extraction Upfront" pattern
+whenever the fields are identified by pattern rather than fixed offset.
+
 ### Data Extraction Upfront
 
 When an operation requires multiple input streams (e.g., data, key1, key2), a common approach is:
@@ -507,6 +543,16 @@ Produce all streams as chunks in one frame, then pop the ones you need as variab
 $ emit sample [ \
   | vsnip 0x200010:0x10 0x200020:0x10 0x4AAB00:0x4500 | pop key iv | aes --iv=v:iv sha256:v:key | dump payload.bin ]
 ```
+
+The same pattern applies when fields come from pattern extraction rather than fixed offsets.
+Replace `vsnip` with any multi-output unit (`rex`, `snip`, archive extractors)
+and use nested framing `[[` when there are multiple matches to process independently:
+
+```
+$ emit data.bin [| rex MAGIC(.{16})(.{32})(.*) {1} {2} {3} [[| pop iv key ]| aes --iv=v:iv v:key | dump out/{index}.bin ]
+```
+
+Here `rex` emits 3 chunks per match (IV, key, ciphertext); `[[` groups each triple; `pop iv key` stores the first two as variables; the remaining ciphertext is decrypted.
 
 ### Sequential Push/Pops
 

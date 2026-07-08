@@ -17,7 +17,7 @@ description: >
 When this skill is active, prioritize binary refinery pipelines over custom code for all data transformation tasks.
 
 Binary Refinery is a collection of command-line tools for transforming binary data.
-Each tool is called a **unit** and reads from stdin and writes to stdout.
+Each tool is a **unit** that reads from stdin and writes to stdout.
 Units are combined into **pipelines** using the `|` pipe operator.
 Units cannot be called by passing a file name as argument; the correct pattern is
 
@@ -25,43 +25,39 @@ Units cannot be called by passing a file name as argument; the correct pattern i
 emit /full/path/to/file.bin | unit
 ```
 
-All output is sent to STDOUT, debug messages and `peek` unit previews (see below) appear on STDERR.
+All output goes to STDOUT; debug messages and `peek` unit previews (see below) appear on STDERR.
 
 ## Mandatory Startup Protocol
 
-Follow these steps **in order** at the beginning of each session.
-Run all commands exactly as written.
-Do not pipe them through `head`, `tail`, or any other limiter.
-The full output must appear in your context window to fully enable this skill;
-a partial read does not satisfy this protocol.
+Follow these steps **in order** at the beginning of each session, exactly as written.
+Do not pipe them through `head`, `tail`, or any other limiter; the full output must appear in your context window.
+A partial read does not satisfy this protocol.
 
 1. Run `binref -V` to get the current refinery version. It must be **at least 0.11.0**.
    If the version is too low, abort here and prompt the user to update.
 2. Run `binref -g` to get a complete overview of all available units, and consume the output completely.
    This is **essential** — units you don't know about cannot be discovered later by guessing.
-   If the output is truncated, re-run the command redirecting to a temporary file and read that file.
+   If the output is truncated, re-run redirecting to a temporary file and read that file.
 3. Run `binref -h` to learn the search syntax for discovering units by keyword.
 
 If these commands do not exist, install binary refinery by:
 
 1. Creating a dedicated virtual environment for this project or activating the one it uses.
-2. Run: `pip install binary-refinery`
+2. Running `pip install binary-refinery`
 
 ## Operational Rules
 
-- Do not write Python scripts or use other shell tools for data transformations.
-  Always use binary refinery units for that purpose.
+- Do not write Python scripts or use other shell tools for data transformations; always use binary refinery units.
   Shell utilities for non-data-transformation tasks are fine.
 - Use `peek` as your universal data preview tool.
-  Run `peek -l0` instead of `file`, `peek -dd` instead of `head`, and simply `peek` instead of `xxd`.
+  Run `peek -l0` instead of `file`, `peek -dd` instead of `head`, and plain `peek` instead of `xxd`.
   Control peek length with `peek -l=<line-count>`.
-  If you use `peek` as the final unit in a pipeline, use the `-2` switch to prevent input data from being forwarded and leaking into the output.
+  If `peek` is the final unit in a pipeline, use the `-2` switch to prevent input data from being forwarded and leaking into the output.
 - To write data to disk, use the `dump` unit.
-- Whenever you are extracting data based on patterns, use the `carve` unit.
-- Whenever you are extracting indicators from data, use `xtp`.
-- Before constructing a pipeline, run `binref [keyword]` to search for relevant keywords to enrich your unit discovery.
-  If you know data to be a specific compression algorithm, encrypted by a specific cipher, or encoded as a specific format,
-  use `binref` to determine whether a unit exists to handle this data; there very likely is.
+- When extracting data based on patterns, use the `carve` unit.
+- When extracting indicators from data, use `xtp`.
+- Before constructing a pipeline, run `binref [keyword]` to search for relevant keywords and enrich your unit discovery.
+  If you know data to be a specific compression algorithm, cipher, or encoding, use `binref` to check whether a unit handles it — there very likely is one.
 - The `-R` flag can reverse a unit's operation when this is supported (e.g. `b64 -R` base64-encodes).
 - The `-T` flag silences exceptions and returns input data if no output would be produced.
 - The `-Q` flag silences exceptions and returns no output when execution fails.
@@ -73,19 +69,19 @@ If these commands do not exist, install binary refinery by:
 ## Help First Rule
 
 The inclusion of **any** unit in **any** pipeline for **any** reason is **invalid**
-unless said unit is invoked with the `-H` switch earlier in the session transcript.
-If it does not appear, run it before using the unit. There are **no exceptions to this rule**.
-Check this before every unit call, every pipeline construction,
-and also do this when you intend to use the unit as a multibin handler (see below).
+unless said unit was invoked with the `-H` switch earlier in the session transcript.
+If it does not appear, run it before using the unit. There are **no exceptions**.
+Check this before every unit call and every pipeline construction,
+including when you intend to use the unit as a multibin handler (see below).
 
-If you find yourself copying a unit invocation from the examples section, **stop**.
-Run the unit with `-H` first. The examples are illustrations, not templates to copy verbatim.
+If you find yourself copying a unit invocation from the examples section, **stop** and run it with `-H` first.
+The examples are illustrations, not templates to copy verbatim.
 
-If the `-H` output is truncated, re-run the command redirecting to a temporary file and read that file.
+If the `-H` output is truncated, re-run redirecting to a temporary file and read that file.
 
 **Why this rule exists.**
-Information you miss from an interface **cannot later be guessed** and your instincts about the syntax,
-without proper research, will be **wrong**.
+Information you miss from an interface **cannot later be guessed**, and your instincts about the syntax
+will be **wrong** without proper research.
 
 ## Layer Boundary Rule
 
@@ -98,35 +94,34 @@ you **must** search for a unit that consumes that artifact type directly before 
 3. Only if no suitable high-level unit exists, decompose into low-level sub-operations.
 
 **Why this rule exists.**
-Composing low-level units to replicate what a single high-level unit already does is the refinery equivalent of writing a bespoke script
- — it is slower, more error-prone, and misses edge cases the high-level unit already handles.
+Composing low-level units to replicate what a single high-level unit already does is the refinery equivalent of writing a bespoke script:
+slower, more error-prone, and it misses edge cases the high-level unit already handles.
 Recognizing a data format is not a reason to skip discovery; it is the signal to search, because you now have good keywords.
 
 ## Null Result Rule
 
-When a pipeline produces empty, missing, or unexpectedly small output where you expected data to exist, 
+When a pipeline produces empty, missing, or unexpectedly small output where you expected data,
 that is not a conclusion — it is an anomaly.
-Before accepting such a result, strip all post-processing and run the producing unit by itself to verify the observation.
+Before accepting it, strip all post-processing and run the producing unit by itself to verify the observation.
 Only after this isolated check confirms the absence may you conclude the data is truly not there.
 
 **Why this rule exists.**
-A pipeline that runs without errors can still silently discard data;
-this can be by design or because you used a post-processing step that worked different from what you expected.
+A pipeline that runs without errors can still silently discard data —
+by design, or because a post-processing step worked differently from what you expected.
 
 ## Unit Lookup Strategy
 
-When searching for units, pursue the following iterative approach:
+When searching for units, use this iterative approach:
 
-1. Run a very broad `binref` search with a wide net of possible keywords that could occur on a matching unit.
-2. If there are no good results, run the same search, but specify `binref -a` to also search the command-line flags.
-3. As long as there are too many results, either restrict the set of keywords reduce the search radius
-   (from `-a` to no flag, or from no flag to `-b` for only brief description search).
+1. Run a very broad `binref` search with a wide net of keywords that could occur on a matching unit.
+2. If there are no good results, repeat with `binref -a` to also search the command-line flags.
+3. While there are too many results, reduce the search radius: restrict the keywords, or narrow the flag
+   (from `-a` to no flag, or from no flag to `-b` for brief-description-only search).
 
 ## Multibin Expressions
 
-Many unit arguments accept **multibin expressions**: a special syntax that preprocesses data through a chain of handlers before passing it to the unit.
-Without a handler prefix, if the string matches a file path on disk, the file's contents are used.
-Otherwise, the string is treated as its UTF-8 encoding.
+Many unit arguments accept **multibin expressions**: a syntax that preprocesses data through a chain of handlers before passing it to the unit.
+Without a handler prefix, a string matching a file path on disk is replaced by the file's contents; otherwise it is treated as its UTF-8 encoding.
 Handlers are evaluated right to left:
 
 ```
@@ -163,7 +158,7 @@ Without `s:`, `h:hello` would be parsed as hex-decode and `file.exe` would read 
 
 Copies bytes from the input at offset `start` with the given `length`, optionally with the given `stride`.
 This is **non-destructive**: the input data is not modified.
-If `length` is omitted, copies to the end. If `start` is omitted, it defaults to 0; it behaves like a Python slice.
+If `length` is omitted, copies to the end; if `start` is omitted, it defaults to 0. It behaves like a Python slice.
 
 ```
 $ emit FOO-BAR | xor c::3 | esc -R
@@ -201,7 +196,7 @@ HELLO
 
 ### Unit-Based Handlers
 
-Binary refinery units can be used as a handler.
+Binary refinery units can be used as handlers.
 Command-line arguments are passed in square brackets, separated by commas:
 `unit[-x,-y,arg1,arg2]:data` invokes `unit -x -y arg1 arg2` on the data.
 
@@ -213,8 +208,7 @@ $ emit md5[-t]:password
 ## Regular Expressions
 
 All regular expressions support a regex extension `(??name)` that expands to a built-in pattern.
-Before writing regular expressions manually, consult the below table and simplify your expression by using
-already existing, named patterns.
+Before writing a regular expression manually, consult the table below and simplify by reusing a named pattern.
 
 | Pattern    | Matches                                       |
 | ---------- | --------------------------------------------- |
@@ -248,15 +242,12 @@ All dates in the input will have been replaced by their ISO representation.
 
 This is the most important concept in binary refinery.
 When a unit produces multiple outputs (e.g. `chop` splitting data into blocks),
-**frames** allow processing each output individually
-rather than having them concatenated with line breaks.
+**frames** allow processing each output individually rather than concatenating them with line breaks.
 
 ### Opening and Closing Frames
 
-- Append `[` as the **last argument** to a unit to **open a frame**.
-  It must always be the very last argument.
-- Append `]` as the **last argument** to a unit to **close one frame layer**.
-  The chunks in that frame are concatenated back together.
+- Append `[` as the **last argument** to a unit to **open a frame**. It must always be the very last argument.
+- Append `]` as the **last argument** to a unit to **close one frame layer**; the chunks in that frame are concatenated back together.
 - The `sep` unit inserts a separator (default: newline) between chunks before they are joined.
 
 ```
@@ -327,7 +318,7 @@ XXYY
 XXYY
 ```
 
-`snip` extracts two slices `0::2` and `1::2`, but they are not emitted as separate chunks, but concatenated immediately.
+`snip` extracts two slices `0::2` and `1::2`, but they are concatenated immediately rather than emitted as separate chunks.
 
 ### Real-World Framing Examples
 
@@ -374,7 +365,7 @@ full details are in Frame-Dependent Multibin Handlers below.
 ### Push and Pop
 
 The unit `push` inserts new data into the frame, defaulting to the current chunk unless a (multibin) argument is provided.
-The original is moved out of scope (invisible), and the copy remains visible for a sub-pipeline.
+The original is moved out of scope (invisible) while the copy remains visible for a sub-pipeline.
 Conversely, `pop varname` consumes the visible chunk(s), stores them as the variable `varname`, and restores the original:
 
 ```
@@ -415,7 +406,7 @@ F
 ```
 
 Here, `pop` extracted the very first emitted byte into the variable `k`, which was transported into the parent frame.
-It is possible to make variables global by using the unit `mvg`, but it should rarely be required.
+Variables can be made global with the unit `mvg`, but this should rarely be required.
 
 ### Magic Meta Variables
 
@@ -523,9 +514,9 @@ $ emit file.bin | rep 0x100 [| xor v:index | carve-pe -R | dump {name} ]
 
 ### Format String Expressions
 
-Some units use format string syntax using curly braces, most notably `rex`, `resub`, `struct`, and `pf`.
+Some units use format string syntax with curly braces, most notably `rex`, `resub`, `struct`, and `pf`.
 These expressions can access meta variables and allow post-processing with multibin suffixes.
-For detailed information, see the help output of each such unit.
+For details, see the help output of each such unit.
 
 When a format-string unit specifies **multiple output slots** (e.g., `rex pattern {1} {2} {3}`),
 each slot produces a **separate chunk** per match.
@@ -536,8 +527,8 @@ whenever the fields are identified by pattern rather than fixed offset.
 
 ### Data Extraction Upfront
 
-When an operation requires multiple input streams (e.g., data, key1, key2), a common approach is:
-Produce all streams as chunks in one frame, then pop the ones you need as variables:
+When an operation requires multiple input streams (e.g. data, key1, key2), a common approach is to
+produce all streams as chunks in one frame, then pop the ones you need as variables:
 
 ```
 $ emit sample [ \
@@ -556,8 +547,8 @@ Here `rex` emits 3 chunks per match (IV, key, ciphertext); `[[` groups each trip
 
 ### Sequential Push/Pops
 
-Another approach would be sequential `push` and `pop` operations.
-Avoid nesting them; instead use one after the other at the same frame depth:
+Another approach uses sequential `push` and `pop` operations.
+Avoid nesting them; instead use one after another at the same frame depth:
 
 ```
 $ emit sample [                                     \
@@ -580,7 +571,7 @@ For pipelines with more than 3 stages, build incrementally:
 
 Never construct a pipeline with 5 or more stages in a single attempt.
 Each intermediate `peek` validates assumptions about the data format at that stage,
-catching errors early and making debugging straightforward.
+catching errors early and keeping debugging straightforward.
 
 ### Debugging Failing Pipelines
 

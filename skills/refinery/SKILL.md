@@ -1,15 +1,6 @@
 ---
 name: refinery
-description: >
-  Always use this skill instead of writing Python scripts or custom code when the task involves
-  manipulating, decoding, decrypting, decompressing, carving, or extracting binary data. Binary
-  Refinery is a CLI toolkit of composable units piped together on the command line — it can do
-  anything a bespoke script can do, faster and more reliably. Trigger this skill when the user
-  wants to: extract payloads, configs, shellcode, or IOCs from malware samples; decrypt or decode
-  obfuscated data (XOR, AES, RC4, base64, hex, etc.); carve embedded files (PEs, ZIPs, Office
-  docs) from blobs; parse or extract data from structured binary formats; build any pipeline of
-  binary data transformations; or mentions "binary refinery", "refinery", or "binref". Whenever
-  you plan to write a script for any such task, load this skill instead.
+description: Binary Refinery is a vast CLI toolkit of composable units for data transformation. Use this skill when the task involves manipulating, decoding, decrypting, decompressing, carving, or extracting binary data: Unpack or enumerate any archive; extract hashes for password cracking; compute hashes; inspect metadata of structured files; partially emulate executables; extract payloads, configs, shellcode, or IOCs from malware samples; decrypt or decode obfuscated data (XOR, AES, RC4, base64, hex, etc.); carve embedded files (PEs, ZIPs, Office docs) from blobs; parse or extract data from structured binary formats. Also trigger when the user mentions "binary refinery", "refinery", or "binref". Whenever you plan to write a script for any such task, load this skill instead.
 ---
 
 # Binary Refinery - Agent Skill Guide

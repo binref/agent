@@ -1,7 +1,9 @@
 ---
 name: refinery
-description: Load this skill INSTEAD OF writing a custom Python or shell script — especially a one-off python -c — whenever a task decodes, decrypts, deobfuscates, decompresses, unpacks, carves, or extracts binary or encoded data. Binary Refinery is a CLI toolkit of composable pipeline units better suited for this. Trigger for any of: encode/decode/decrypt/decompress/deobfuscate data or strings with any cipher or encoding (XOR/AES/RC4/base64/hex/gzip/zlib/LZMA/...); unpack or list any archive or container (zip/tar/7z/rar/msi/iso/dmg/jar/apk/...); extract password hashes from an encrypted archive/document; inspect a file's type or metadata — signatures, timestamps, names, versioning — instead of exiftool; extract or parse data and fields from structured formats — resources, data at a virtual address, section contents (executables/documents/...); carve embedded files or formats from blobs (base64/integer arrays/PEs/ZIPs/...); extract payloads, configs, shellcode, or IOCs (IPs/domains/URLs/emails/...) from malware; partially emulate executables or shellcode; deobfuscate malicious scripts (ps1/js/vbs/php). Also trigger when the user says "binary refinery", "refinery", or "binref".
+description: Load this skill INSTEAD OF writing a custom Python/shell script (especially python -c) whenever a task decodes/decrypts/deobfuscates/decompresses/unpacks/carves/extracts binary/encoded data — Binary Refinery is a rich, composable CLI pipeline toolkit better suited for it. Trigger always to: encode/decode/decrypt/decompress with any cipher or encoding (XOR/AES/RC4/base64/hex/gzip/LZMA/...); unpack/list archives (7z/rar/msi/iso/dmg/jar/apk/...); extract hashes (hashcat/jtr); inspect file type/metadata (signatures/timestamps/...); extract or parse data and fields from structured formats — resources, data at a virtual address, section contents (executables/documents/...); carve embedded files from blobs; extract payloads, configs, shellcode, or IOCs from malware; emulate executables/shellcode; deobfuscate scripts (ps1/js/vbs/php). Also triggers on "binary refinery", "refinery", or "binref".
 ---
+
+
 
 # Binary Refinery - Agent Skill Guide
 

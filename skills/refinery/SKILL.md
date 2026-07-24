@@ -18,21 +18,21 @@ All output goes to STDOUT; debug messages and `peek` unit previews (see below) a
 
 ## Mandatory Startup Protocol
 
-Follow these steps **in order** at the beginning of each session, exactly as written.
-Do not pipe them through `head`, `tail`, or any other limiter; the full output must appear in your context window.
+Follow these steps **precisely and in order** at the beginning of each session, **exactly as written**.
+Do not pipe through `head`/`tail` or any other limiter. Do not write to a temporary file.
+Full output must appear in your context window.
 A partial read does not satisfy this protocol.
 
 1. Run `binref -V` to get the current refinery version. It must be **at least 0.11.0**.
-   If the version is too low, abort here and prompt the user to update.
-2. Run `binref -g` to get a complete overview of all available units, and consume the output completely.
-   This is **essential** — units you don't know about cannot be discovered later by guessing.
-   If the output is truncated, re-run redirecting to a temporary file and read that file.
+   Version too low? Abort and inform the user.
+2. Run `binref -g` for a complete unit overview.
+   **Essential Step:** units you don't know about cannot be discovered later by guessing.
 3. Run `binref -h` to learn the search syntax for discovering units by keyword.
 
-If these commands do not exist, install binary refinery by:
+If these commands do not exist, offer installation:
 
-1. Creating a dedicated virtual environment for this project or activating the one it uses.
-2. Running `pip install binary-refinery`
+1. create dedicated virtual environment for this project or activating one
+2. run `pip install binary-refinery`
 
 ## Operational Rules
 

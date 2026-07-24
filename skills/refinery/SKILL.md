@@ -18,10 +18,9 @@ All output goes to STDOUT; debug messages and `peek` unit previews (see below) a
 
 ## Mandatory Startup Protocol
 
-Follow these steps **precisely and in order** at the beginning of each session, **exactly as written**.
+Follow these steps in order at the start of each session, **exactly as written**.
 Do not pipe through `head`/`tail` or any other limiter. Do not write to a temporary file.
-Full output must appear in your context window.
-A partial read does not satisfy this protocol.
+The full output must appear in your context window; a partial read does not satisfy this protocol.
 
 1. Run `binref -V` to get the current refinery version. It must be **at least 0.11.0**.
    Version too low? Abort and inform the user.
@@ -31,7 +30,7 @@ A partial read does not satisfy this protocol.
 
 If these commands do not exist, offer installation:
 
-1. create dedicated virtual environment for this project or activating one
+1. create or activate a dedicated virtual environment for this project
 2. run `pip install binary-refinery`
 
 ## Operational Rules
@@ -45,7 +44,7 @@ If these commands do not exist, offer installation:
 - To write data to disk, use the `dump` unit.
 - When extracting data based on patterns, use the `carve` unit.
 - When extracting indicators from data, use `xtp`.
-- Before constructing a pipeline, run `binref [keyword]` to search for relevant keywords and enrich your unit discovery.
+- Before constructing a pipeline, run `binref [keyword]` to search for relevant units.
   If you know data to be a specific compression algorithm, cipher, or encoding, use `binref` to check whether a unit handles it — there very likely is one.
 - The `-R` flag can reverse a unit's operation when this is supported (e.g. `b64 -R` base64-encodes).
 - The `-T` flag silences exceptions and returns input data if no output would be produced.
@@ -84,7 +83,7 @@ you **must** search for a unit that consumes that artifact type directly before 
 
 **Why this rule exists.**
 Composing low-level units to replicate what a single high-level unit already does is the refinery equivalent of writing a bespoke script:
-slower, more error-prone, and it misses edge cases the high-level unit already handles.
+slower, more error-prone, and it misses edge cases that unit handles.
 Recognizing a data format is not a reason to skip discovery; it is the signal to search, because you now have good keywords.
 
 ## Null Result Rule
@@ -455,7 +454,7 @@ $ emit AABBCCDD | chop 2 [| scope 0 2 | map AC WY | scope 1 3 | map BD XZ ]
 WWXXYYZZ
 ```
 
-Chunks 0 and 2 have `AB` mapped to `XY`; chunks 1 and 3 have `CD` mapped to `ZW`.
+For chunks 0 and 2,  A->W and C->Y; for chunks 1 and 3, B->X and D->Z.
 The closing `]` concatenates all four results in their original order.
 
 Use `scope` when chunks need different treatments; use `push`/`pop` when you need to derive an auxiliary value (a key, IV, or length) from the data for use in a later operation.

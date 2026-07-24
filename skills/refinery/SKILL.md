@@ -24,8 +24,9 @@ The full output must appear in your context window; a partial read does not sati
 
 1. Run `binref -V` to get the current refinery version. It must be **at least 0.11.0**.
    Version too low? Abort and inform the user.
-2. Run `binref -g` for a complete unit overview.
-   **Essential Step:** units you don't know about cannot be discovered later by guessing.
+2. Run `binref -g` for a compact unit overview.
+   The output of this command is kept brief.
+   Running it is essential: Units you don't know about cannot be discovered later by guessing.
 3. Run `binref -h` to learn the search syntax for discovering units by keyword.
 
 If these commands do not exist, offer installation:

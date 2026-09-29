@@ -163,7 +163,7 @@ $ emit #H#E#L#L#O | emit c:1::2
 HELLO
 ```
 
-`c:1::2` copies every other byte starting at offset 1.
+`c:1::2` copies every other byte starting at  offset 1.
 
 ### Handler: `x:start:length[:stride]`
 
@@ -415,8 +415,8 @@ They are computed on demand when accessed:
 
 Some units produce meta variables in addition to their output:
 
-- `offset`: Offset where data was found, set by `carve` and `rex`
-- `path`: Virtual path, set by archive extractors like `xt`.
+- `start` and `end`: specify where content was extracted from, set by `carve` and `rex`
+- `path` and `date`: virtual path and archived date information, set by archive extractors like `xt`
 
 ### Conditional Filtering
 
